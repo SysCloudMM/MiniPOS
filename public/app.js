@@ -166,8 +166,7 @@ class MiniPOS {
                 this.token = response.data.token;
                 this.user = response.data.user;
                 
-                console.log('Stored token:', this.token);
-                console.log('Stored user:', this.user);
+                console.log('Login successful - User data:', this.user);
                 
                 localStorage.setItem('minipos_token', this.token);
                 localStorage.setItem('minipos_user', JSON.stringify(this.user));
@@ -200,7 +199,7 @@ class MiniPOS {
     showDashboard() {
         document.getElementById('loginScreen').classList.remove('active');
         document.getElementById('dashboardScreen').classList.add('active');
-        document.getElementById('userInfo').textContent = `Welcome, ${this.user.name}`;
+        document.getElementById('userInfo').textContent = `Welcome, ${this.user.name || this.user.username}`;
         
         // Hide user management link for cashiers
         const userManagementLink = document.getElementById('userManagementLink');
