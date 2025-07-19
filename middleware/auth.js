@@ -19,14 +19,14 @@ const authenticateToken = async (req, res, next) => {
     
     // Get user from database
     const user = await database.getRow(
-      'SELECT id, username, email, role FROM users WHERE id = ?',
+      'SELECT id, username, email, role, is_active FROM users WHERE id = ? AND is_active = 1',
       [decoded.userId]
     );
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid token'
+        message: 'Invalid token or account disabled'
       });
     }
 

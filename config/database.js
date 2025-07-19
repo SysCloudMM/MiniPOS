@@ -30,10 +30,12 @@ const initialize = () => {
       db.run(`
         CREATE TABLE IF NOT EXISTS users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
           username TEXT UNIQUE NOT NULL,
           email TEXT UNIQUE NOT NULL,
           password TEXT NOT NULL,
           role TEXT DEFAULT 'cashier' CHECK(role IN ('admin', 'manager', 'cashier')),
+          is_active BOOLEAN DEFAULT 1,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
@@ -116,8 +118,8 @@ const initialize = () => {
 
       // Insert default admin user
       db.run(`
-        INSERT OR IGNORE INTO users (username, email, password, role) 
-        VALUES ('admin', 'admin@minipos.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin')
+        INSERT OR IGNORE INTO users (name, username, email, password, role, is_active) 
+        VALUES ('Administrator', 'admin', 'admin@minipos.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 1)
       `);
 
       // Insert default categories

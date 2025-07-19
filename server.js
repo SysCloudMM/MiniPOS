@@ -7,6 +7,7 @@ const database = require('./config/database');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const customerRoutes = require('./routes/customers');
+const userRoutes = require('./routes/users');
 const saleRoutes = require('./routes/sales');
 const reportRoutes = require('./routes/reports');
 
@@ -25,6 +26,7 @@ app.use(express.static('public'));
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/customers', customerRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/sales', saleRoutes);
 app.use('/api/reports', reportRoutes);
 

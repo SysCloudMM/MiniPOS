@@ -71,6 +71,10 @@
                             <i class="fas fa-users"></i>
                             Customers
                         </a></li>
+                        <li><a href="#" data-section="users" class="nav-link">
+                            <i class="fas fa-user-cog"></i>
+                            User Management
+                        </a></li>
                         <li><a href="#" data-section="sales" class="nav-link">
                             <i class="fas fa-receipt"></i>
                             Sales History
@@ -182,6 +186,34 @@
                                 </thead>
                                 <tbody id="customersTable">
                                     <!-- Customers will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Users Section -->
+                    <section id="usersSection" class="content-section">
+                        <div class="section-header">
+                            <h2>User Management</h2>
+                            <button id="addUserBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Add User
+                            </button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Username</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTable">
+                                    <!-- Users will be loaded here -->
                                 </tbody>
                             </table>
                         </div>
@@ -527,6 +559,53 @@
                 <div class="form-group">
                     <label for="customerAddress">Address</label>
                     <textarea id="customerAddress" name="address"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="userModalTitle">Add User</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="userForm">
+                <div class="form-group">
+                    <label for="userName">Name</label>
+                    <input type="text" id="userName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="userUsername">Username</label>
+                    <input type="text" id="userUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">Email</label>
+                    <input type="email" id="userEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="userPassword">Password</label>
+                    <input type="password" id="userPassword" name="password" required>
+                    <small class="form-hint">Leave blank to keep current password (when editing)</small>
+                </div>
+                <div class="form-group">
+                    <label for="userRole">Role</label>
+                    <select id="userRole" name="role" required>
+                        <option value="cashier">Cashier</option>
+                        <option value="manager">Manager</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="userActive" name="is_active" checked>
+                        <span class="checkmark"></span>
+                        Enable User
+                    </label>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline modal-cancel">Cancel</button>

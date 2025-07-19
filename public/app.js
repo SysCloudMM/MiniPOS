@@ -6,6 +6,7 @@ class MiniPOS {
         this.cart = [];
         this.products = [];
         this.customers = [];
+        this.users = [];
         this.sales = [];
         
         this.init();
@@ -115,6 +116,16 @@ class MiniPOS {
         document.getElementById('addCustomerBtn').addEventListener('click', () => {
             this.showCustomerModal();
         });
+
+        document.getElementById('addUserBtn').addEventListener('click', () => {
+            this.showUserModal();
+        });
+
+        // User form submission
+        document.getElementById('userForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleUserSubmit();
+        });
     }
 
     setupModalControls() {
@@ -207,6 +218,9 @@ class MiniPOS {
             case 'customers':
                 this.loadCustomersTable();
                 break;
+            case 'users':
+                this.loadUsersTable();
+                break;
             case 'sales':
                 this.loadSalesTable();
                 break;
@@ -241,7 +255,8 @@ class MiniPOS {
     async loadInitialData() {
         await Promise.all([
             this.loadProducts(),
-            this.loadCustomers()
+            this.loadCustomers(),
+            this.loadUsers()
         ]);
     }
 
@@ -265,6 +280,17 @@ class MiniPOS {
             }
         } catch (error) {
             console.error('Failed to load customers:', error);
+        }
+    }
+
+    async loadUsers() {
+        try {
+            const response = await this.apiCall('/api/users');
+            if (response.success) {
+                this.users = response.data;
+            }
+        } catch (error) {
+            console.error('Failed to load users:', error);
         }
     }
 
@@ -968,6 +994,156 @@ class MiniPOS {
                 }
             } catch (error) {
                 this.showError('Failed to delete customer: ' + error.message);
+            }
+        }
+    }
+
+    // User Management
+    async loadUsersTable() {
+        try {
+            const response = await this.apiCall('/api/users');
+            if (response.success) {
+                this.renderUsersTable(response.data);
+            }
+        } catch (error) {
+            console.error('Failed to load users table:', error);
+        }
+    }
+
+    renderUsersTable(users) {
+        const tbody = document.getElementById('usersTable');
+        tbody.innerHTML = '';
+
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            const statusClass = user.is_active ? 'status-completed' : 'status-cancelled';
+            const statusText = user.is_active ? 'Active' : 'Disabled';
+            
+            row.innerHTML = `
+                <td>${user.name}</td>
+                <td>${user.username}</td>
+                <td>${user.email}</td>
+                <td><span class="role-badge role-${user.role}">${user.role}</span></td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>
+                    <button class="btn btn-small btn-outline" onclick="app.editUser(${user.id})" title="Edit User">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-small ${user.is_active ? 'btn-warning' : 'btn-success'}" 
+                            onclick="app.toggleUserStatus(${user.id})" 
+                            title="${user.is_active ? 'Disable' : 'Enable'} User">
+                        <i class="fas fa-${user.is_active ? 'ban' : 'check'}"></i>
+                    </button>
+                    <button class="btn btn-small btn-danger" onclick="app.deleteUser(${user.id})" title="Delete User">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    showUserModal(user = null) {
+        const modal = document.getElementById('userModal');
+        const form = document.getElementById('userForm');
+        const title = document.getElementById('userModalTitle');
+        const passwordField = document.getElementById('userPassword');
+
+        if (user) {
+            title.textContent = 'Edit User';
+            document.getElementById('userName').value = user.name;
+            document.getElementById('userUsername').value = user.username;
+            document.getElementById('userEmail').value = user.email;
+            document.getElementById('userRole').value = user.role;
+            document.getElementById('userActive').checked = user.is_active;
+            passwordField.removeAttribute('required');
+            passwordField.placeholder = 'Leave blank to keep current password';
+            form.dataset.userId = user.id;
+        } else {
+            title.textContent = 'Add User';
+            form.reset();
+            document.getElementById('userActive').checked = true;
+            passwordField.setAttribute('required', 'required');
+            passwordField.placeholder = '';
+            delete form.dataset.userId;
+        }
+
+        modal.classList.add('active');
+    }
+
+    async handleUserSubmit() {
+        const form = document.getElementById('userForm');
+        const formData = new FormData(form);
+        const userData = Object.fromEntries(formData);
+        
+        // Convert checkbox value
+        userData.is_active = document.getElementById('userActive').checked;
+        
+        // Remove empty password for updates
+        if (form.dataset.userId && !userData.password.trim()) {
+            delete userData.password;
+        }
+
+        try {
+            let response;
+            if (form.dataset.userId) {
+                response = await this.apiCall(`/api/users/${form.dataset.userId}`, 'PUT', userData);
+            } else {
+                response = await this.apiCall('/api/users', 'POST', userData);
+            }
+
+            if (response.success) {
+                this.showSuccess('User saved successfully!');
+                this.closeModals();
+                this.loadUsersTable();
+                this.loadUsers();
+            } else {
+                this.showError('Failed to save user: ' + response.message);
+            }
+        } catch (error) {
+            this.showError('Failed to save user: ' + error.message);
+        }
+    }
+
+    async editUser(id) {
+        try {
+            const response = await this.apiCall(`/api/users/${id}`);
+            if (response.success) {
+                this.showUserModal(response.data);
+            }
+        } catch (error) {
+            this.showError('Failed to load user: ' + error.message);
+        }
+    }
+
+    async toggleUserStatus(id) {
+        try {
+            const response = await this.apiCall(`/api/users/${id}/toggle-status`, 'PATCH');
+            if (response.success) {
+                this.showSuccess(response.message);
+                this.loadUsersTable();
+                this.loadUsers();
+            } else {
+                this.showError('Failed to toggle user status: ' + response.message);
+            }
+        } catch (error) {
+            this.showError('Failed to toggle user status: ' + error.message);
+        }
+    }
+
+    async deleteUser(id) {
+        if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            try {
+                const response = await this.apiCall(`/api/users/${id}`, 'DELETE');
+                if (response.success) {
+                    this.showSuccess('User deleted successfully!');
+                    this.loadUsersTable();
+                    this.loadUsers();
+                } else {
+                    this.showError('Failed to delete user: ' + response.message);
+                }
+            } catch (error) {
+                this.showError('Failed to delete user: ' + error.message);
             }
         }
     }
