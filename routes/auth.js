@@ -45,18 +45,18 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    if (!user.is_active) {
-      return res.status(401).json({
-        success: false,
-        message: 'Account is disabled'
-      });
-    }
-
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
+      });
+    }
+
+    if (!user.is_active) {
+      return res.status(401).json({
+        success: false,
+        message: 'This user account is inactive. Please contact the administrator.'
       });
     }
 
