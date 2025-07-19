@@ -131,7 +131,11 @@ const initialize = () => {
           ('General', 'General merchandise'),
           ('Electronics', 'Electronic items'),
           ('Clothing', 'Apparel and clothing'),
-          ('Food & Beverages', 'Food and drink items')
+          ('Food & Beverages', 'Food and drink items'),
+          ('Books & Stationery', 'Books, notebooks, and office supplies'),
+          ('Health & Beauty', 'Health and beauty products'),
+          ('Home & Garden', 'Home improvement and garden items'),
+          ('Sports & Outdoors', 'Sports equipment and outdoor gear')
       `);
 
       // Insert sample products for testing

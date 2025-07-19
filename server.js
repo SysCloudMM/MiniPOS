@@ -6,6 +6,7 @@ require('dotenv').config();
 const database = require('./config/database');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
+const categoryRoutes = require('./routes/categories');
 const customerRoutes = require('./routes/customers');
 const userRoutes = require('./routes/users');
 const saleRoutes = require('./routes/sales');
@@ -25,6 +26,7 @@ app.use(express.static('public'));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/sales', saleRoutes);

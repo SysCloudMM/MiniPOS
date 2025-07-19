@@ -4,6 +4,7 @@ let cart = [];
 let products = [];
 let customers = [];
 let users = [];
+let categories = [];
 
 // API Base URL
 const API_BASE = '/api';
@@ -186,6 +187,9 @@ const showSection = (sectionName) => {
         case 'products':
             loadProducts();
             break;
+        case 'categories':
+            loadCategories();
+            break;
         case 'customers':
             loadCustomers();
             break;
@@ -201,6 +205,116 @@ const showSection = (sectionName) => {
     }
 };
 
+// Category management
+const loadCategories = async () => {
+    try {
+        const response = await apiCall('/categories');
+        categories = response.data;
+        renderCategories();
+        updateCategoryDropdown();
+    } catch (error) {
+        console.error('Failed to load categories:', error);
+        showAlert('Failed to load categories: ' + error.message, 'error');
+    }
+};
+
+const renderCategories = async () => {
+    const tbody = document.getElementById('categoriesTable');
+    tbody.innerHTML = '';
+    
+    for (const category of categories) {
+        // Get product count for this category
+        let productCount = 0;
+        try {
+            const response = await apiCall(`/products?category=${category.id}`);
+            productCount = response.data.length;
+        } catch (error) {
+            console.error('Failed to get product count:', error);
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${category.name}</td>
+            <td>${category.description || 'N/A'}</td>
+            <td>${productCount}</td>
+            <td>
+                <button class="btn btn-small btn-warning" onclick="editCategory(${category.id})">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-small btn-danger" onclick="deleteCategory(${category.id})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    }
+};
+
+const updateCategoryDropdown = () => {
+    const categorySelect = document.getElementById('productCategory');
+    if (!categorySelect) return;
+    
+    categorySelect.innerHTML = '';
+    
+    categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.id;
+        option.textContent = category.name;
+        categorySelect.appendChild(option);
+    });
+};
+
+const saveCategory = async (categoryData, isEdit = false, categoryId = null) => {
+    try {
+        const endpoint = isEdit ? `/categories/${categoryId}` : '/categories';
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await apiCall(endpoint, {
+            method,
+            body: JSON.stringify(categoryData)
+        });
+        
+        showAlert(`Category ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
+        closeModal('categoryModal');
+        loadCategories();
+    } catch (error) {
+        showAlert('Failed to save category: ' + error.message, 'error');
+    }
+};
+
+const editCategory = (id) => {
+    const category = categories.find(c => c.id === id);
+    if (!category) return;
+    
+    document.getElementById('categoryModalTitle').textContent = 'Edit Category';
+    document.getElementById('categoryName').value = category.name;
+    document.getElementById('categoryDescription').value = category.description || '';
+    
+    document.getElementById('categoryForm').onsubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const categoryData = {
+            name: formData.get('name'),
+            description: formData.get('description') || ''
+        };
+        saveCategory(categoryData, true, id);
+    };
+    
+    openModal('categoryModal');
+};
+
+const deleteCategory = async (id) => {
+    if (!confirm('Are you sure you want to delete this category?')) return;
+    
+    try {
+        await apiCall(`/categories/${id}`, { method: 'DELETE' });
+        showAlert('Category deleted successfully!', 'success');
+        loadCategories();
+    } catch (error) {
+        showAlert('Failed to delete category: ' + error.message, 'error');
+    }
+};
+
 // Product management
 const loadProducts = async () => {
     try {
@@ -208,6 +322,10 @@ const loadProducts = async () => {
         products = response.data;
         renderProducts();
         renderProductGrid();
+        // Load categories for dropdown
+        if (categories.length === 0) {
+            await loadCategories();
+        }
     } catch (error) {
         console.error('Failed to load products:', error);
         showAlert('Failed to load products: ' + error.message, 'error');
@@ -961,6 +1079,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add buttons
     document.getElementById('addProductBtn').addEventListener('click', () => {
         document.getElementById('productModalTitle').textContent = 'Add Product';
+        // Load categories before opening modal
+        loadCategories().then(() => {
+            updateCategoryDropdown();
+        });
         document.getElementById('productForm').onsubmit = (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -978,6 +1100,20 @@ document.addEventListener('DOMContentLoaded', () => {
             saveProduct(productData);
         };
         openModal('productModal');
+    });
+    
+    document.getElementById('addCategoryBtn').addEventListener('click', () => {
+        document.getElementById('categoryModalTitle').textContent = 'Add Category';
+        document.getElementById('categoryForm').onsubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const categoryData = {
+                name: formData.get('name'),
+                description: formData.get('description') || ''
+            };
+            saveCategory(categoryData);
+        };
+        openModal('categoryModal');
     });
     
     document.getElementById('addCustomerBtn').addEventListener('click', () => {
