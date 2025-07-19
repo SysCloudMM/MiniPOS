@@ -222,21 +222,11 @@ const renderCategories = async () => {
     const tbody = document.getElementById('categoriesTable');
     tbody.innerHTML = '';
     
-    for (const category of categories) {
-        // Get product count for this category
-        let productCount = 0;
-        try {
-            const response = await apiCall(`/products?category=${category.id}`);
-            productCount = response.data.length;
-        } catch (error) {
-            console.error('Failed to get product count:', error);
-        }
-        
+    categories.forEach(category => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${category.name}</td>
             <td>${category.description || 'N/A'}</td>
-            <td>${productCount}</td>
             <td>
                 <button class="btn btn-small btn-warning" onclick="editCategory(${category.id})">
                     <i class="fas fa-edit"></i> Edit
@@ -247,7 +237,7 @@ const renderCategories = async () => {
             </td>
         `;
         tbody.appendChild(row);
-    }
+    });
 };
 
 const updateCategoryDropdown = () => {
@@ -661,6 +651,9 @@ const renderSales = (sales) => {
                 <button class="btn btn-small btn-primary" onclick="viewSale(${sale.id})">
                     <i class="fas fa-eye"></i> View
                 </button>
+                <button class="btn btn-small btn-danger" onclick="deleteSale(${sale.id})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
             </td>
         `;
         tbody.appendChild(row);
@@ -687,46 +680,66 @@ const viewSale = async (id) => {
         const saleDetails = `
             <div class="sale-details">
                 <h3>Sale #${sale.id}</h3>
-                <p><strong>Date:</strong> ${formatDate(sale.created_at)}</p>
-                <p><strong>Customer:</strong> ${sale.customer_name || 'Walk-in'}</p>
-                <p><strong>Cashier:</strong> ${sale.cashier_name}</p>
-                <p><strong>Payment Method:</strong> ${sale.payment_method}</p>
-                <p><strong>Status:</strong> ${sale.status}</p>
+                
+                <div class="sale-info-grid">
+                    <div class="sale-info-item">
+                        <strong>Date:</strong>
+                        <span>${formatDate(sale.created_at)}</span>
+                    </div>
+                    <div class="sale-info-item">
+                        <strong>Customer:</strong>
+                        <span>${sale.customer_name || 'Walk-in'}</span>
+                    </div>
+                    <div class="sale-info-item">
+                        <strong>Cashier:</strong>
+                        <span>${sale.cashier_name}</span>
+                    </div>
+                    <div class="sale-info-item">
+                        <strong>Payment Method:</strong>
+                        <span>${sale.payment_method}</span>
+                    </div>
+                    <div class="sale-info-item">
+                        <strong>Status:</strong>
+                        <span class="status-badge status-${sale.status}">${sale.status}</span>
+                    </div>
+                </div>
                 
                 <h4>Items:</h4>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Qty</th>
-                            <th>Unit Price</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${itemsHtml}
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                    </table>
+                </div>
                 
                 <div class="sale-summary">
-                    <p><strong>Subtotal:</strong> ${formatCurrency(sale.total_amount)}</p>
-                    <p><strong>Discount:</strong> ${formatCurrency(sale.discount_amount)}</p>
-                    <p><strong>Tax:</strong> ${formatCurrency(sale.tax_amount)}</p>
-                    <p><strong>Total:</strong> ${formatCurrency(sale.final_amount)}</p>
+                    <p><strong>Subtotal:</strong> <span>${formatCurrency(sale.total_amount)}</span></p>
+                    <p><strong>Discount:</strong> <span>${formatCurrency(sale.discount_amount)}</span></p>
+                    <p><strong>Tax:</strong> <span>${formatCurrency(sale.tax_amount)}</span></p>
+                    <p><strong>Total:</strong> <span>${formatCurrency(sale.final_amount)}</span></p>
                 </div>
             </div>
         `;
         
         // Create a simple modal for sale details
         const modal = document.createElement('div');
-        modal.className = 'modal active';
+        modal.className = 'modal modal-large active';
         modal.innerHTML = `
             <div class="modal-content">
                 <div class="modal-header">
                     <h3>Sale Details</h3>
                     <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
                 </div>
-                <div style="padding: 1.5rem;">
+                <div style="padding: 1rem;">
                     ${saleDetails}
                 </div>
             </div>
@@ -735,6 +748,18 @@ const viewSale = async (id) => {
         
     } catch (error) {
         showAlert('Failed to load sale details: ' + error.message, 'error');
+    }
+};
+
+const deleteSale = async (id) => {
+    if (!confirm('Are you sure you want to delete this sale? This action cannot be undone.')) return;
+    
+    try {
+        await apiCall(`/sales/${id}`, { method: 'DELETE' });
+        showAlert('Sale deleted successfully!', 'success');
+        loadSales();
+    } catch (error) {
+        showAlert('Failed to delete sale: ' + error.message, 'error');
     }
 };
 

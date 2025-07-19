@@ -259,4 +259,57 @@ router.patch('/:id/status', async (req, res) => {
   }
 });
 
+// Delete sale
+router.delete('/:id', async (req, res) => {
+  try {
+    // Check if sale exists
+    const sale = await database.getRow(
+      'SELECT id FROM sales WHERE id = ?',
+      [req.params.id]
+    );
+
+    if (!sale) {
+      return res.status(404).json({
+        success: false,
+        message: 'Sale not found'
+      });
+    }
+
+    // Start transaction
+    await database.runQuery('BEGIN TRANSACTION');
+
+    try {
+      // Delete sale items first (due to foreign key constraint)
+      await database.runQuery(
+        'DELETE FROM sale_items WHERE sale_id = ?',
+        [req.params.id]
+      );
+
+      // Delete the sale
+      await database.runQuery(
+        'DELETE FROM sales WHERE id = ?',
+        [req.params.id]
+      );
+
+      // Commit transaction
+      await database.runQuery('COMMIT');
+
+      res.json({
+        success: true,
+        message: 'Sale deleted successfully'
+      });
+    } catch (error) {
+      // Rollback transaction on error
+      await database.runQuery('ROLLBACK');
+      throw error;
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to delete sale',
+      error: error.message
+    });
+  }
+});
+
 module.exports = router;
