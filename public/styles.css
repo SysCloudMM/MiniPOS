@@ -375,26 +375,6 @@ body {
     }
 }
 
-/* Special styling for User Management link */
-.nav-link[data-section="users"]:hover,
-.nav-link[data-section="users"].active {
-    background: #fff3cd;
-    color: #856404;
-    border: 2px solid #ffc107;
-    border-radius: 20px;
-    margin: 0.25rem 0.5rem;
-    padding: 0.5rem 1rem;
-    font-weight: 600;
-}
-
-@media (min-width: 768px) {
-    .nav-link[data-section="users"]:hover,
-    .nav-link[data-section="users"].active {
-        margin: 0.25rem;
-        padding: 0.75rem 1.25rem;
-        border-right: 2px solid #ffc107;
-    }
-}
 .nav-link i {
     margin-right: 0;
     margin-bottom: 0.25rem;
