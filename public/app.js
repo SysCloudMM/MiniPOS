@@ -279,8 +279,12 @@ const editProduct = (id) => {
     
     document.getElementById('productModalTitle').textContent = 'Edit Product';
     document.getElementById('productName').value = product.name;
+    document.getElementById('productDescription').value = product.description || '';
+    document.getElementById('productBarcode').value = product.barcode || '';
     document.getElementById('productPrice').value = product.price;
+    document.getElementById('productCost').value = product.cost || 0;
     document.getElementById('productStock').value = product.stock_quantity;
+    document.getElementById('productMinStock').value = product.min_stock || 0;
     document.getElementById('productCategory').value = product.category_id;
     
     document.getElementById('productForm').onsubmit = (e) => {
@@ -288,9 +292,14 @@ const editProduct = (id) => {
         const formData = new FormData(e.target);
         const productData = {
             name: formData.get('name'),
+            description: formData.get('description') || '',
+            barcode: formData.get('barcode') || '',
             price: parseFloat(formData.get('price')),
+            cost: parseFloat(formData.get('cost')) || 0,
             stock_quantity: parseInt(formData.get('stock_quantity')),
-            category_id: parseInt(formData.get('category_id'))
+            min_stock: parseInt(formData.get('min_stock')) || 0,
+            category_id: parseInt(formData.get('category_id')),
+            is_active: product.is_active
         };
         saveProduct(productData, true, id);
     };
@@ -957,9 +966,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const formData = new FormData(e.target);
             const productData = {
                 name: formData.get('name'),
+                description: formData.get('description') || '',
+                barcode: formData.get('barcode') || '',
                 price: parseFloat(formData.get('price')),
+                cost: parseFloat(formData.get('cost')) || 0,
                 stock_quantity: parseInt(formData.get('stock_quantity')),
-                category_id: parseInt(formData.get('category_id'))
+                min_stock: parseInt(formData.get('min_stock')) || 0,
+                category_id: parseInt(formData.get('category_id')),
+                is_active: true
             };
             saveProduct(productData);
         };

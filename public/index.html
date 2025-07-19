@@ -277,12 +277,28 @@
                     <input type="text" id="productName" name="name" required>
                 </div>
                 <div class="form-group">
+                    <label for="productDescription">Description</label>
+                    <textarea id="productDescription" name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="productBarcode">Barcode</label>
+                    <input type="text" id="productBarcode" name="barcode">
+                </div>
+                <div class="form-group">
                     <label for="productPrice">Price</label>
                     <input type="number" id="productPrice" name="price" step="1" min="0" required placeholder="Enter price in MMK">
                 </div>
                 <div class="form-group">
+                    <label for="productCost">Cost</label>
+                    <input type="number" id="productCost" name="cost" step="1" min="0" placeholder="Enter cost in MMK">
+                </div>
+                <div class="form-group">
                     <label for="productStock">Stock Quantity</label>
                     <input type="number" id="productStock" name="stock_quantity" required>
+                </div>
+                <div class="form-group">
+                    <label for="productMinStock">Minimum Stock</label>
+                    <input type="number" id="productMinStock" name="min_stock" min="0" placeholder="Minimum stock level">
                 </div>
                 <div class="form-group">
                     <label for="productCategory">Category</label>

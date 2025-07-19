@@ -16,10 +16,7 @@ const productSchema = Joi.object({
   price: Joi.number().positive().required(),
   cost: Joi.number().min(0).default(0),
   stock_quantity: Joi.number().integer().min(0).default(0),
-  barcode: Joi.string().allow(''),
-  stock_quantity: Joi.number().integer().min(0).default(0),
   min_stock: Joi.number().integer().min(0).default(0),
-  is_active: Joi.boolean().default(true),
   category_id: Joi.number().integer().positive(),
   is_active: Joi.boolean().default(true)
 });

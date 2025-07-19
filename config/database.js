@@ -134,6 +134,13 @@ const initialize = () => {
           ('Food & Beverages', 'Food and drink items')
       `);
 
+      // Insert sample products for testing
+      db.run(`
+        INSERT OR IGNORE INTO products (id, name, description, price, cost, stock_quantity, min_stock, category_id, is_active) 
+        VALUES 
+          (1, 'Sample Product', 'This is a sample product for testing', 1000, 800, 50, 10, 1, 1)
+      `);
+
       console.log('Database initialized successfully');
       resolve();
     });
