@@ -192,6 +192,14 @@ class MiniPOS {
         document.getElementById('loginScreen').classList.remove('active');
         document.getElementById('dashboardScreen').classList.add('active');
         document.getElementById('userInfo').textContent = `Welcome, ${this.user.username}`;
+        
+        // Hide user management link for cashiers
+        const userManagementLink = document.getElementById('userManagementLink');
+        if (this.user.role === 'cashier') {
+            userManagementLink.style.display = 'none';
+        } else {
+            userManagementLink.style.display = 'block';
+        }
     }
 
     showSection(sectionName) {
@@ -206,6 +214,15 @@ class MiniPOS {
             section.classList.remove('active');
         });
         document.getElementById(`${sectionName}Section`).classList.add('active');
+
+        // Check permissions for user management
+        if (sectionName === 'users') {
+            if (!this.user || !['admin', 'manager'].includes(this.user.role)) {
+                this.showError('You do not have permission to access User Management');
+                this.showSection('pos');
+                return;
+            }
+        }
 
         // Load section-specific data
         switch(sectionName) {

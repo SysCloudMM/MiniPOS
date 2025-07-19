@@ -14,7 +14,7 @@ router.use(authorizeRole(['admin', 'manager']));
 
 // Validation schemas
 const userSchema = Joi.object({
-  name: Joi.string().required(),
+  name: Joi.string().min(1).required(),
   username: Joi.string().alphanum().min(3).max(30).required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(6).when('$isUpdate', {
@@ -27,7 +27,7 @@ const userSchema = Joi.object({
 });
 
 const updateUserSchema = Joi.object({
-  name: Joi.string().required(),
+  name: Joi.string().min(1).required(),
   username: Joi.string().alphanum().min(3).max(30).required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(6).allow(''),
