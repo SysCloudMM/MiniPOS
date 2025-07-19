@@ -457,19 +457,24 @@ const renderProductGrid = () => {
     const grid = document.getElementById('productGrid');
     if (!grid) return;
     
-    grid.innerHTML = '';
-    
     const activeProducts = products.filter(p => p.is_active !== false);
     const startIndex = (currentPosPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const paginatedProducts = activeProducts.slice(startIndex, endIndex);
     
     if (paginatedProducts.length === 0) {
-        grid.innerHTML = '<div class="no-products">No products available</div>';
+        grid.innerHTML = `
+            <div class="no-products">
+                <i class="fas fa-box-open"></i>
+                <p>No products available</p>
+                <span>Add products to your inventory to get started</span>
+            </div>
+        `;
         updatePosPagination();
         return;
     }
     
+    grid.innerHTML = '';
     paginatedProducts.forEach(product => {
         const card = document.createElement('div');
         card.className = 'product-card';
@@ -1007,14 +1012,20 @@ const updateCartQuantity = (productId, change) => {
 
 const renderCart = () => {
     const container = document.getElementById('cartItems');
-    container.innerHTML = '';
     
     if (cart.length === 0) {
-        container.innerHTML = '<p class="text-center">No items in cart</p>';
+        container.innerHTML = `
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <p>No items in cart</p>
+                <span>Add products to start a sale</span>
+            </div>
+        `;
         updateCartSummary();
         return;
     }
     
+    container.innerHTML = '';
     cart.forEach(item => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'cart-item';
@@ -1174,6 +1185,26 @@ const setupPhoneValidation = () => {
 document.addEventListener('DOMContentLoaded', () => {
     // Check authentication on page load
     checkAuth();
+    
+    // Sidebar toggle functionality
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('sidebar');
+    
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(e.target) && 
+                !sidebarToggle.contains(e.target) && 
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+    }
     
     // Login form
     document.getElementById('loginForm').addEventListener('submit', async (e) => {

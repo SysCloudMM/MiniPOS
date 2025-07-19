@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MiniPOS System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Pyidaungsu:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>MiniPOS - Modern Point of Sale</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="./styles.css" rel="stylesheet">
 </head>
 <body>
@@ -13,140 +13,281 @@
         <!-- Login Screen -->
         <div id="loginScreen" class="screen active">
             <div class="login-container">
+                <div class="login-background">
+                    <div class="login-shape shape-1"></div>
+                    <div class="login-shape shape-2"></div>
+                    <div class="login-shape shape-3"></div>
+                </div>
                 <div class="login-card">
                     <div class="login-header">
-                        <i class="fas fa-cash-register"></i>
-                        <h1>MiniPOS</h1>
-                        <p>Point of Sale System</p>
+                        <div class="login-logo">
+                            <div class="logo-icon">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <h1>MiniPOS</h1>
+                        </div>
+                        <p>Welcome back! Please sign in to your account</p>
                     </div>
-                    <form id="loginForm">
+                    <form id="loginForm" class="login-form">
                         <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" id="username" name="username" required>
+                            <div class="input-wrapper">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" id="username" name="username" placeholder="Username" required>
+                            </div>
                         </div>
                         <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" id="password" name="password" required>
+                            <div class="input-wrapper">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input type="password" id="password" name="password" placeholder="Password" required>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt"></i>
-                            Login
+                        <button type="submit" class="btn btn-primary btn-login">
+                            <span>Sign In</span>
+                            <i class="fas fa-arrow-right"></i>
                         </button>
                     </form>
+                    <div class="login-footer">
+                        <p>Default credentials: admin / password</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Main Dashboard -->
         <div id="dashboardScreen" class="screen">
-            <nav class="navbar">
-                <div class="nav-brand">
-                    <i class="fas fa-cash-register"></i>
-                    <span>MiniPOS</span>
-                </div>
-                <div class="nav-user">
-                    <span id="userInfo"></span>
-                    <button id="logoutBtn" class="btn btn-outline">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Logout
+            <!-- Top Navigation -->
+            <nav class="top-navbar">
+                <div class="navbar-left">
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
                     </button>
+                    <div class="nav-brand">
+                        <div class="brand-icon">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <span class="brand-text">MiniPOS</span>
+                    </div>
+                </div>
+                <div class="navbar-center">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search products, customers, orders...">
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <div class="nav-actions">
+                        <button class="nav-action-btn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                        <div class="user-menu">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-info">
+                                <span id="userInfo" class="user-name">Welcome, User</span>
+                                <span class="user-role">Administrator</span>
+                            </div>
+                            <div class="user-dropdown">
+                                <button id="logoutBtn" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    <span>Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </nav>
 
-            <div class="main-content">
-                <aside class="sidebar">
-                    <ul class="nav-menu">
-                        <li><a href="#" data-section="pos" class="nav-link active" title="Point of Sale">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span>Point of Sale</span>
-                        </a></li>
-                        <li><a href="#" data-section="products" class="nav-link" title="Products">
-                            <i class="fas fa-box"></i>
-                            <span>Products</span>
-                        </a></li>
-                        <li><a href="#" data-section="categories" class="nav-link" title="Categories">
-                            <i class="fas fa-tags"></i>
-                            <span>Categories</span>
-                        </a></li>
-                        <li><a href="#" data-section="customers" class="nav-link" title="Customers">
-                            <i class="fas fa-users"></i>
-                            <span>Customers</span>
-                        </a></li>
-                        <li><a href="#" data-section="sales" class="nav-link" title="Sales History">
-                            <i class="fas fa-receipt"></i>
-                            <span>Sales History</span>
-                        </a></li>
-                        <li><a href="#" data-section="reports" class="nav-link" title="Reports">
-                            <i class="fas fa-chart-bar"></i>
-                            <span>Reports</span>
-                        </a></li>
-                        <li><a href="#" data-section="settings" class="nav-link" id="settingsLink" title="Settings">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
-                        </a></li>
-                    </ul>
+            <div class="main-layout">
+                <!-- Sidebar -->
+                <aside class="sidebar" id="sidebar">
+                    <div class="sidebar-content">
+                        <nav class="sidebar-nav">
+                            <div class="nav-section">
+                                <h3 class="nav-section-title">Main</h3>
+                                <ul class="nav-menu">
+                                    <li class="nav-item">
+                                        <a href="#" data-section="pos" class="nav-link active">
+                                            <div class="nav-icon">
+                                                <i class="fas fa-cash-register"></i>
+                                            </div>
+                                            <span class="nav-text">Point of Sale</span>
+                                            <div class="nav-indicator"></div>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#" data-section="products" class="nav-link">
+                                            <div class="nav-icon">
+                                                <i class="fas fa-box"></i>
+                                            </div>
+                                            <span class="nav-text">Products</span>
+                                            <div class="nav-indicator"></div>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#" data-section="categories" class="nav-link">
+                                            <div class="nav-icon">
+                                                <i class="fas fa-tags"></i>
+                                            </div>
+                                            <span class="nav-text">Categories</span>
+                                            <div class="nav-indicator"></div>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#" data-section="customers" class="nav-link">
+                                            <div class="nav-icon">
+                                                <i class="fas fa-users"></i>
+                                            </div>
+                                            <span class="nav-text">Customers</span>
+                                            <div class="nav-indicator"></div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="nav-section">
+                                <h3 class="nav-section-title">Analytics</h3>
+                                <ul class="nav-menu">
+                                    <li class="nav-item">
+                                        <a href="#" data-section="sales" class="nav-link">
+                                            <div class="nav-icon">
+                                                <i class="fas fa-receipt"></i>
+                                            </div>
+                                            <span class="nav-text">Sales History</span>
+                                            <div class="nav-indicator"></div>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="#" data-section="reports" class="nav-link">
+                                            <div class="nav-icon">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                            <span class="nav-text">Reports</span>
+                                            <div class="nav-indicator"></div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="nav-section">
+                                <h3 class="nav-section-title">System</h3>
+                                <ul class="nav-menu">
+                                    <li class="nav-item">
+                                        <a href="#" data-section="settings" class="nav-link" id="settingsLink">
+                                            <div class="nav-icon">
+                                                <i class="fas fa-cog"></i>
+                                            </div>
+                                            <span class="nav-text">Settings</span>
+                                            <div class="nav-indicator"></div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </nav>
+                    </div>
                 </aside>
 
-                <main class="content">
+                <!-- Main Content -->
+                <main class="main-content">
                     <!-- POS Section -->
                     <section id="posSection" class="content-section active">
-                        <div class="pos-container">
-                            <div class="pos-left">
-                                <div class="product-search">
-                                    <input type="text" id="productSearch" placeholder="Search products or scan barcode...">
-                                    <button id="searchBtn" class="btn btn-primary">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                </div>
-                                <div class="product-grid" id="productGrid">
-                                    <!-- Products will be loaded here -->
-                                </div>
-                                <div id="posPagination" class="pagination-container">
-                                    <div class="pagination-info">
-                                        <span id="posPageInfo">Showing 0 - 0 of 0 products</span>
-                                    </div>
-                                    <div class="pagination-controls">
-                                        <button id="posPrevBtn" class="pagination-btn">
-                                            <i class="fas fa-chevron-left"></i> Previous
-                                        </button>
-                                        <button id="posNextBtn" class="pagination-btn">
-                                            Next <i class="fas fa-chevron-right"></i>
-                                        </button>
+                        <div class="section-header">
+                            <div class="header-left">
+                                <h1 class="section-title">Point of Sale</h1>
+                                <p class="section-subtitle">Process sales and manage transactions</p>
+                            </div>
+                            <div class="header-actions">
+                                <button class="btn btn-outline">
+                                    <i class="fas fa-history"></i>
+                                    <span>Recent Sales</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pos-layout">
+                            <div class="pos-main">
+                                <div class="product-section">
+                                    <div class="section-card">
+                                        <div class="card-header">
+                                            <h3>Products</h3>
+                                            <div class="product-search">
+                                                <div class="search-input-wrapper">
+                                                    <i class="fas fa-search"></i>
+                                                    <input type="text" id="productSearch" placeholder="Search products or scan barcode...">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-content">
+                                            <div class="product-grid" id="productGrid">
+                                                <!-- Products will be loaded here -->
+                                            </div>
+                                            <div class="pagination-wrapper">
+                                                <div id="posPagination" class="pagination-container">
+                                                    <div class="pagination-info">
+                                                        <span id="posPageInfo">Showing 0 - 0 of 0 products</span>
+                                                    </div>
+                                                    <div class="pagination-controls">
+                                                        <button id="posPrevBtn" class="pagination-btn">
+                                                            <i class="fas fa-chevron-left"></i>
+                                                        </button>
+                                                        <button id="posNextBtn" class="pagination-btn">
+                                                            <i class="fas fa-chevron-right"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="pos-right">
-                                <div class="cart-header">
-                                    <h3>Current Sale</h3>
-                                    <button id="clearCart" class="btn btn-outline">Clear</button>
-                                </div>
-                                <div class="cart-items" id="cartItems">
-                                    <!-- Cart items will appear here -->
-                                </div>
-                                <div class="cart-summary">
-                                    <div class="summary-row">
-                                        <span>Subtotal:</span>
-                                        <span id="subtotal">0 MMK</span>
+
+                            <div class="pos-sidebar">
+                                <div class="cart-section">
+                                    <div class="section-card">
+                                        <div class="card-header">
+                                            <h3>Current Order</h3>
+                                            <button id="clearCart" class="btn btn-ghost btn-sm">
+                                                <i class="fas fa-trash"></i>
+                                                Clear
+                                            </button>
+                                        </div>
+                                        <div class="card-content">
+                                            <div class="cart-items" id="cartItems">
+                                                <div class="empty-cart">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    <p>No items in cart</p>
+                                                    <span>Add products to start a sale</span>
+                                                </div>
+                                            </div>
+                                            <div class="cart-summary">
+                                                <div class="summary-row">
+                                                    <span>Subtotal</span>
+                                                    <span id="subtotal" class="amount">0 MMK</span>
+                                                </div>
+                                                <div class="summary-row">
+                                                    <span>Tax (5%)</span>
+                                                    <span id="tax" class="amount">0 MMK</span>
+                                                </div>
+                                                <div class="summary-row total-row">
+                                                    <span>Total</span>
+                                                    <span id="total" class="amount">0 MMK</span>
+                                                </div>
+                                            </div>
+                                            <div class="checkout-section">
+                                                <div class="payment-method">
+                                                    <label>Payment Method</label>
+                                                    <select id="paymentMethod" class="form-select">
+                                                        <option value="cash">Cash</option>
+                                                        <option value="card">Card</option>
+                                                        <option value="digital">Digital</option>
+                                                    </select>
+                                                </div>
+                                                <button id="checkoutBtn" class="btn btn-primary btn-checkout">
+                                                    <i class="fas fa-credit-card"></i>
+                                                    <span>Process Payment</span>
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="summary-row">
-                                        <span>Tax:</span>
-                                        <span id="tax">0 MMK</span>
-                                    </div>
-                                    <div class="summary-row total">
-                                        <span>Total:</span>
-                                        <span id="total">0 MMK</span>
-                                    </div>
-                                </div>
-                                <div class="checkout-actions">
-                                    <select id="paymentMethod" class="form-control">
-                                        <option value="cash">Cash</option>
-                                        <option value="card">Card</option>
-                                        <option value="digital">Digital</option>
-                                    </select>
-                                    <button id="checkoutBtn" class="btn btn-success btn-large">
-                                        <i class="fas fa-credit-card"></i>
-                                        Checkout
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -155,39 +296,46 @@
                     <!-- Products Section -->
                     <section id="productsSection" class="content-section">
                         <div class="section-header">
-                            <h2>Products</h2>
-                            <button id="addProductBtn" class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Add Product
-                            </button>
-                        </div>
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Price</th>
-                                        <th>Stock</th>
-                                        <th>Category</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="productsTable">
-                                    <!-- Products will be loaded here -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div id="productsPagination" class="pagination-container">
-                            <div class="pagination-info">
-                                <span id="productsPageInfo">Showing 0 - 0 of 0 products</span>
+                            <div class="header-left">
+                                <h1 class="section-title">Products</h1>
+                                <p class="section-subtitle">Manage your product inventory</p>
                             </div>
-                            <div class="pagination-controls">
-                                <button id="productsPrevBtn" class="pagination-btn">
-                                    <i class="fas fa-chevron-left"></i> Previous
+                            <div class="header-actions">
+                                <button id="addProductBtn" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add Product</span>
                                 </button>
-                                <button id="productsNextBtn" class="pagination-btn">
-                                    Next <i class="fas fa-chevron-right"></i>
-                                </button>
+                            </div>
+                        </div>
+                        <div class="section-card">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Price</th>
+                                            <th>Stock</th>
+                                            <th>Category</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="productsTable">
+                                        <!-- Products will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="productsPagination" class="pagination-container">
+                                <div class="pagination-info">
+                                    <span id="productsPageInfo">Showing 0 - 0 of 0 products</span>
+                                </div>
+                                <div class="pagination-controls">
+                                    <button id="productsPrevBtn" class="pagination-btn">
+                                        <i class="fas fa-chevron-left"></i> Previous
+                                    </button>
+                                    <button id="productsNextBtn" class="pagination-btn">
+                                        Next <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -195,37 +343,44 @@
                     <!-- Categories Section -->
                     <section id="categoriesSection" class="content-section">
                         <div class="section-header">
-                            <h2>Product Categories</h2>
-                            <button id="addCategoryBtn" class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Add Category
-                            </button>
-                        </div>
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Description</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="categoriesTable">
-                                    <!-- Categories will be loaded here -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div id="categoriesPagination" class="pagination-container">
-                            <div class="pagination-info">
-                                <span id="categoriesPageInfo">Showing 0 - 0 of 0 categories</span>
+                            <div class="header-left">
+                                <h1 class="section-title">Categories</h1>
+                                <p class="section-subtitle">Organize your products by categories</p>
                             </div>
-                            <div class="pagination-controls">
-                                <button id="categoriesPrevBtn" class="pagination-btn">
-                                    <i class="fas fa-chevron-left"></i> Previous
+                            <div class="header-actions">
+                                <button id="addCategoryBtn" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add Category</span>
                                 </button>
-                                <button id="categoriesNextBtn" class="pagination-btn">
-                                    Next <i class="fas fa-chevron-right"></i>
-                                </button>
+                            </div>
+                        </div>
+                        <div class="section-card">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="categoriesTable">
+                                        <!-- Categories will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="categoriesPagination" class="pagination-container">
+                                <div class="pagination-info">
+                                    <span id="categoriesPageInfo">Showing 0 - 0 of 0 categories</span>
+                                </div>
+                                <div class="pagination-controls">
+                                    <button id="categoriesPrevBtn" class="pagination-btn">
+                                        <i class="fas fa-chevron-left"></i> Previous
+                                    </button>
+                                    <button id="categoriesNextBtn" class="pagination-btn">
+                                        Next <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -233,153 +388,160 @@
                     <!-- Customers Section -->
                     <section id="customersSection" class="content-section">
                         <div class="section-header">
-                            <h2>Customers</h2>
-                            <button id="addCustomerBtn" class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Add Customer
-                            </button>
-                        </div>
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Phone</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="customersTable">
-                                    <!-- Customers will be loaded here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-
-                    <!-- Users Section -->
-                    <section id="settingsSection" class="content-section">
-                        <div class="section-header">
-                            <h2>Settings</h2>
-                        </div>
-                        <div class="settings-grid">
-                            <div class="settings-card" onclick="showSettingsSubsection('users')">
-                                <div class="settings-card-icon">
-                                    <i class="fas fa-user-shield"></i>
-                                </div>
-                                <div class="settings-card-content">
-                                    <h3>User Management</h3>
-                                    <p>Manage system users, roles and permissions for your POS system</p>
-                                </div>
-                                <div class="settings-card-arrow">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
+                            <div class="header-left">
+                                <h1 class="section-title">Customers</h1>
+                                <p class="section-subtitle">Manage customer information</p>
+                            </div>
+                            <div class="header-actions">
+                                <button id="addCustomerBtn" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add Customer</span>
+                                </button>
                             </div>
                         </div>
-                    </section>
-
-                    <!-- Users Subsection -->
-                    <section id="usersSection" class="content-section">
-                        <div class="section-header">
-                            <h2>
-                                <button class="btn btn-outline" onclick="showSection('settings')" style="margin-right: 1rem;">
-                                    <i class="fas fa-arrow-left"></i>
-                                    Back to Settings
-                                </button>
-                                User Management
-                            </h2>
-                            <button id="addUserBtn" class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Add User
-                            </button>
-                        </div>
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Username</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="usersTable">
-                                    <!-- Users will be loaded here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-
-                    <!-- Legacy Users Section (keeping for compatibility) -->
-                    <section id="legacyUsersSection" class="content-section">
-                        <div class="section-header">
-                            <h2>User Management</h2>
-                            <button id="addUserBtn" class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Add User
-                            </button>
-                        </div>
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Username</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="usersTable">
-                                    <!-- Users will be loaded here -->
-                                </tbody>
-                            </table>
+                        <div class="section-card">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customersTable">
+                                        <!-- Customers will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </section>
 
                     <!-- Sales Section -->
                     <section id="salesSection" class="content-section">
                         <div class="section-header">
-                            <h2>Sales History</h2>
+                            <div class="header-left">
+                                <h1 class="section-title">Sales History</h1>
+                                <p class="section-subtitle">View and manage sales transactions</p>
+                            </div>
                         </div>
-                        <div class="table-container">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Customer</th>
-                                        <th>Total</th>
-                                        <th>Payment</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="salesTable">
-                                    <!-- Sales will be loaded here -->
-                                </tbody>
-                            </table>
+                        <div class="section-card">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Customer</th>
+                                            <th>Total</th>
+                                            <th>Payment</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="salesTable">
+                                        <!-- Sales will be loaded here -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </section>
 
                     <!-- Reports Section -->
                     <section id="reportsSection" class="content-section">
                         <div class="section-header">
-                            <h2>Reports</h2>
+                            <div class="header-left">
+                                <h1 class="section-title">Reports & Analytics</h1>
+                                <p class="section-subtitle">Business insights and performance metrics</p>
+                            </div>
                         </div>
                         <div class="reports-grid">
                             <div class="report-card">
-                                <h3>Sales Summary</h3>
-                                <div id="salesSummary">
-                                    <!-- Sales summary will be loaded here -->
+                                <div class="card-header">
+                                    <h3>Sales Overview</h3>
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="card-content">
+                                    <div id="salesSummary">
+                                        <!-- Sales summary will be loaded here -->
+                                    </div>
                                 </div>
                             </div>
                             <div class="report-card">
-                                <h3>Top Products</h3>
-                                <div id="topProducts">
-                                    <!-- Top products will be loaded here -->
+                                <div class="card-header">
+                                    <h3>Top Products</h3>
+                                    <i class="fas fa-trophy"></i>
                                 </div>
+                                <div class="card-content">
+                                    <div id="topProducts">
+                                        <!-- Top products will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Settings Section -->
+                    <section id="settingsSection" class="content-section">
+                        <div class="section-header">
+                            <div class="header-left">
+                                <h1 class="section-title">Settings</h1>
+                                <p class="section-subtitle">System configuration and preferences</p>
+                            </div>
+                        </div>
+                        <div class="settings-grid">
+                            <div class="settings-card" onclick="showSettingsSubsection('users')">
+                                <div class="settings-icon">
+                                    <i class="fas fa-users-cog"></i>
+                                </div>
+                                <div class="settings-content">
+                                    <h3>User Management</h3>
+                                    <p>Manage system users, roles and permissions</p>
+                                </div>
+                                <div class="settings-arrow">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Users Section -->
+                    <section id="usersSection" class="content-section">
+                        <div class="section-header">
+                            <div class="header-left">
+                                <button class="btn btn-ghost" onclick="showSection('settings')">
+                                    <i class="fas fa-arrow-left"></i>
+                                    <span>Back to Settings</span>
+                                </button>
+                                <div>
+                                    <h1 class="section-title">User Management</h1>
+                                    <p class="section-subtitle">Manage system users and permissions</p>
+                                </div>
+                            </div>
+                            <div class="header-actions">
+                                <button id="addUserBtn" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add User</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="section-card">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTable">
+                                        <!-- Users will be loaded here -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </section>
@@ -390,389 +552,198 @@
 
     <!-- Modals -->
     <div id="productModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container">
             <div class="modal-header">
                 <h3 id="productModalTitle">Add Product</h3>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <form id="productForm">
-                <div class="form-group">
-                    <label for="productName">Name</label>
-                    <input type="text" id="productName" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="productDescription">Description</label>
-                    <textarea id="productDescription" name="description" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="productBarcode">Barcode</label>
-                    <input type="text" id="productBarcode" name="barcode">
-                </div>
-                <div class="form-group">
-                    <label for="productPrice">Price</label>
-                    <input type="number" id="productPrice" name="price" step="1" min="0" required placeholder="Enter price in MMK">
-                </div>
-                <div class="form-group">
-                    <label for="productCost">Cost</label>
-                    <input type="number" id="productCost" name="cost" step="1" min="0" placeholder="Enter cost in MMK">
-                </div>
-                <div class="form-group">
-                    <label for="productStock">Stock Quantity</label>
-                    <input type="number" id="productStock" name="stock_quantity" required>
-                </div>
-                <div class="form-group">
-                    <label for="productMinStock">Minimum Stock</label>
-                    <input type="number" id="productMinStock" name="min_stock" min="0" placeholder="Minimum stock level">
-                </div>
-                <div class="form-group">
-                    <label for="productCategory">Category</label>
-                    <select id="productCategory" name="category_id" required>
-                        <option value="1">General</option>
-                        <option value="2">Electronics</option>
-                        <option value="3">Clothing</option>
-                        <option value="4">Food & Beverages</option>
-                    </select>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-outline modal-cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <form id="productForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="productName">Product Name</label>
+                            <input type="text" id="productName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productBarcode">Barcode</label>
+                            <input type="text" id="productBarcode" name="barcode">
+                        </div>
+                        <div class="form-group">
+                            <label for="productPrice">Price (MMK)</label>
+                            <input type="number" id="productPrice" name="price" step="1" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productCost">Cost (MMK)</label>
+                            <input type="number" id="productCost" name="cost" step="1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="productStock">Stock Quantity</label>
+                            <input type="number" id="productStock" name="stock_quantity" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productMinStock">Minimum Stock</label>
+                            <input type="number" id="productMinStock" name="min_stock" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="productCategory">Category</label>
+                        <select id="productCategory" name="category_id" required>
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productDescription">Description</label>
+                        <textarea id="productDescription" name="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost modal-cancel">Cancel</button>
+                <button type="submit" form="productForm" class="btn btn-primary">Save Product</button>
+            </div>
         </div>
     </div>
 
     <div id="categoryModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container">
             <div class="modal-header">
                 <h3 id="categoryModalTitle">Add Category</h3>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <form id="categoryForm">
-                <div class="form-group">
-                    <label for="categoryName">Name</label>
-                    <input type="text" id="categoryName" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="categoryDescription">Description</label>
-                    <textarea id="categoryDescription" name="description" rows="3"></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-outline modal-cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <form id="categoryForm">
+                    <div class="form-group">
+                        <label for="categoryName">Category Name</label>
+                        <input type="text" id="categoryName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoryDescription">Description</label>
+                        <textarea id="categoryDescription" name="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost modal-cancel">Cancel</button>
+                <button type="submit" form="categoryForm" class="btn btn-primary">Save Category</button>
+            </div>
         </div>
     </div>
 
     <div id="customerModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container">
             <div class="modal-header">
                 <h3 id="customerModalTitle">Add Customer</h3>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <form id="customerForm">
-                <div class="form-group">
-                    <label for="customerName">Name</label>
-                    <input type="text" id="customerName" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="customerEmail">Email</label>
-                    <input type="email" id="customerEmail" name="email">
-                </div>
-                <div class="form-group">
-                    <label for="customerPhone">Phone</label>
-                    <div class="phone-input-group">
-                        <div class="country-code-wrapper">
-                            <input type="text" id="customerCountryCodeSearch" class="country-code-search" placeholder="Search country..." autocomplete="off">
-                            <select id="customerCountryCode" name="country_code" class="country-code-select">
-                                <option value="+93">Afghanistan +93</option>
-                                <option value="+355">Albania +355</option>
-                                <option value="+213">Algeria +213</option>
-                                <option value="+1">American Samoa +1</option>
-                                <option value="+376">Andorra +376</option>
-                                <option value="+244">Angola +244</option>
-                                <option value="+1">Anguilla +1</option>
-                                <option value="+1">Antigua and Barbuda +1</option>
-                                <option value="+54">Argentina +54</option>
-                                <option value="+374">Armenia +374</option>
-                                <option value="+297">Aruba +297</option>
-                                <option value="+61">Australia +61</option>
-                                <option value="+43">Austria +43</option>
-                                <option value="+994">Azerbaijan +994</option>
-                                <option value="+1">Bahamas +1</option>
-                                <option value="+973">Bahrain +973</option>
-                                <option value="+880">Bangladesh +880</option>
-                                <option value="+1">Barbados +1</option>
-                                <option value="+375">Belarus +375</option>
-                                <option value="+32">Belgium +32</option>
-                                <option value="+501">Belize +501</option>
-                                <option value="+229">Benin +229</option>
-                                <option value="+1">Bermuda +1</option>
-                                <option value="+975">Bhutan +975</option>
-                                <option value="+591">Bolivia +591</option>
-                                <option value="+387">Bosnia and Herzegovina +387</option>
-                                <option value="+267">Botswana +267</option>
-                                <option value="+55">Brazil +55</option>
-                                <option value="+1">British Virgin Islands +1</option>
-                                <option value="+673">Brunei +673</option>
-                                <option value="+359">Bulgaria +359</option>
-                                <option value="+226">Burkina Faso +226</option>
-                                <option value="+257">Burundi +257</option>
-                                <option value="+855">Cambodia +855</option>
-                                <option value="+237">Cameroon +237</option>
-                                <option value="+1">Canada +1</option>
-                                <option value="+238">Cape Verde +238</option>
-                                <option value="+1">Cayman Islands +1</option>
-                                <option value="+236">Central African Republic +236</option>
-                                <option value="+235">Chad +235</option>
-                                <option value="+56">Chile +56</option>
-                                <option value="+86">China +86</option>
-                                <option value="+57">Colombia +57</option>
-                                <option value="+269">Comoros +269</option>
-                                <option value="+242">Congo +242</option>
-                                <option value="+243">Congo (DRC) +243</option>
-                                <option value="+682">Cook Islands +682</option>
-                                <option value="+506">Costa Rica +506</option>
-                                <option value="+225">Côte d'Ivoire +225</option>
-                                <option value="+385">Croatia +385</option>
-                                <option value="+53">Cuba +53</option>
-                                <option value="+357">Cyprus +357</option>
-                                <option value="+420">Czech Republic +420</option>
-                                <option value="+45">Denmark +45</option>
-                                <option value="+253">Djibouti +253</option>
-                                <option value="+1">Dominica +1</option>
-                                <option value="+1">Dominican Republic +1</option>
-                                <option value="+593">Ecuador +593</option>
-                                <option value="+20">Egypt +20</option>
-                                <option value="+503">El Salvador +503</option>
-                                <option value="+240">Equatorial Guinea +240</option>
-                                <option value="+291">Eritrea +291</option>
-                                <option value="+372">Estonia +372</option>
-                                <option value="+251">Ethiopia +251</option>
-                                <option value="+500">Falkland Islands +500</option>
-                                <option value="+298">Faroe Islands +298</option>
-                                <option value="+679">Fiji +679</option>
-                                <option value="+358">Finland +358</option>
-                                <option value="+33">France +33</option>
-                                <option value="+594">French Guiana +594</option>
-                                <option value="+689">French Polynesia +689</option>
-                                <option value="+241">Gabon +241</option>
-                                <option value="+220">Gambia +220</option>
-                                <option value="+995">Georgia +995</option>
-                                <option value="+49">Germany +49</option>
-                                <option value="+233">Ghana +233</option>
-                                <option value="+350">Gibraltar +350</option>
-                                <option value="+30">Greece +30</option>
-                                <option value="+299">Greenland +299</option>
-                                <option value="+1">Grenada +1</option>
-                                <option value="+590">Guadeloupe +590</option>
-                                <option value="+1">Guam +1</option>
-                                <option value="+502">Guatemala +502</option>
-                                <option value="+224">Guinea +224</option>
-                                <option value="+245">Guinea-Bissau +245</option>
-                                <option value="+592">Guyana +592</option>
-                                <option value="+509">Haiti +509</option>
-                                <option value="+504">Honduras +504</option>
-                                <option value="+852">Hong Kong +852</option>
-                                <option value="+36">Hungary +36</option>
-                                <option value="+354">Iceland +354</option>
-                                <option value="+91">India +91</option>
-                                <option value="+62">Indonesia +62</option>
-                                <option value="+98">Iran +98</option>
-                                <option value="+964">Iraq +964</option>
-                                <option value="+353">Ireland +353</option>
-                                <option value="+972">Israel +972</option>
-                                <option value="+39">Italy +39</option>
-                                <option value="+1">Jamaica +1</option>
-                                <option value="+81">Japan +81</option>
-                                <option value="+962">Jordan +962</option>
-                                <option value="+7">Kazakhstan +7</option>
-                                <option value="+254">Kenya +254</option>
-                                <option value="+686">Kiribati +686</option>
-                                <option value="+965">Kuwait +965</option>
-                                <option value="+996">Kyrgyzstan +996</option>
-                                <option value="+856">Laos +856</option>
-                                <option value="+371">Latvia +371</option>
-                                <option value="+961">Lebanon +961</option>
-                                <option value="+266">Lesotho +266</option>
-                                <option value="+231">Liberia +231</option>
-                                <option value="+218">Libya +218</option>
-                                <option value="+423">Liechtenstein +423</option>
-                                <option value="+370">Lithuania +370</option>
-                                <option value="+352">Luxembourg +352</option>
-                                <option value="+853">Macao +853</option>
-                                <option value="+389">Macedonia +389</option>
-                                <option value="+261">Madagascar +261</option>
-                                <option value="+265">Malawi +265</option>
-                                <option value="+60">Malaysia +60</option>
-                                <option value="+960">Maldives +960</option>
-                                <option value="+223">Mali +223</option>
-                                <option value="+356">Malta +356</option>
-                                <option value="+692">Marshall Islands +692</option>
-                                <option value="+596">Martinique +596</option>
-                                <option value="+222">Mauritania +222</option>
-                                <option value="+230">Mauritius +230</option>
-                                <option value="+52">Mexico +52</option>
-                                <option value="+691">Micronesia +691</option>
-                                <option value="+373">Moldova +373</option>
-                                <option value="+377">Monaco +377</option>
-                                <option value="+976">Mongolia +976</option>
-                                <option value="+382">Montenegro +382</option>
-                                <option value="+1">Montserrat +1</option>
-                                <option value="+212">Morocco +212</option>
-                                <option value="+258">Mozambique +258</option>
-                                <option value="+95" selected>Myanmar +95</option>
-                                <option value="+264">Namibia +264</option>
-                                <option value="+674">Nauru +674</option>
-                                <option value="+977">Nepal +977</option>
-                                <option value="+31">Netherlands +31</option>
-                                <option value="+687">New Caledonia +687</option>
-                                <option value="+64">New Zealand +64</option>
-                                <option value="+505">Nicaragua +505</option>
-                                <option value="+227">Niger +227</option>
-                                <option value="+234">Nigeria +234</option>
-                                <option value="+683">Niue +683</option>
-                                <option value="+850">North Korea +850</option>
-                                <option value="+1">Northern Mariana Islands +1</option>
-                                <option value="+47">Norway +47</option>
-                                <option value="+968">Oman +968</option>
-                                <option value="+92">Pakistan +92</option>
-                                <option value="+680">Palau +680</option>
-                                <option value="+970">Palestine +970</option>
-                                <option value="+507">Panama +507</option>
-                                <option value="+675">Papua New Guinea +675</option>
-                                <option value="+595">Paraguay +595</option>
-                                <option value="+51">Peru +51</option>
-                                <option value="+63">Philippines +63</option>
-                                <option value="+48">Poland +48</option>
-                                <option value="+351">Portugal +351</option>
-                                <option value="+1">Puerto Rico +1</option>
-                                <option value="+974">Qatar +974</option>
-                                <option value="+40">Romania +40</option>
-                                <option value="+7">Russia +7</option>
-                                <option value="+250">Rwanda +250</option>
-                                <option value="+1">Saint Kitts and Nevis +1</option>
-                                <option value="+1">Saint Lucia +1</option>
-                                <option value="+508">Saint Pierre and Miquelon +508</option>
-                                <option value="+1">Saint Vincent and the Grenadines +1</option>
-                                <option value="+685">Samoa +685</option>
-                                <option value="+378">San Marino +378</option>
-                                <option value="+239">São Tomé and Príncipe +239</option>
-                                <option value="+966">Saudi Arabia +966</option>
-                                <option value="+221">Senegal +221</option>
-                                <option value="+381">Serbia +381</option>
-                                <option value="+248">Seychelles +248</option>
-                                <option value="+232">Sierra Leone +232</option>
-                                <option value="+65">Singapore +65</option>
-                                <option value="+421">Slovakia +421</option>
-                                <option value="+386">Slovenia +386</option>
-                                <option value="+677">Solomon Islands +677</option>
-                                <option value="+252">Somalia +252</option>
-                                <option value="+27">South Africa +27</option>
-                                <option value="+82">South Korea +82</option>
-                                <option value="+211">South Sudan +211</option>
-                                <option value="+34">Spain +34</option>
-                                <option value="+94">Sri Lanka +94</option>
-                                <option value="+249">Sudan +249</option>
-                                <option value="+597">Suriname +597</option>
-                                <option value="+268">Swaziland +268</option>
-                                <option value="+46">Sweden +46</option>
-                                <option value="+41">Switzerland +41</option>
-                                <option value="+963">Syria +963</option>
-                                <option value="+886">Taiwan +886</option>
-                                <option value="+992">Tajikistan +992</option>
-                                <option value="+255">Tanzania +255</option>
-                                <option value="+66">Thailand +66</option>
-                                <option value="+670">Timor-Leste +670</option>
-                                <option value="+228">Togo +228</option>
-                                <option value="+690">Tokelau +690</option>
-                                <option value="+676">Tonga +676</option>
-                                <option value="+1">Trinidad and Tobago +1</option>
-                                <option value="+216">Tunisia +216</option>
-                                <option value="+90">Turkey +90</option>
-                                <option value="+993">Turkmenistan +993</option>
-                                <option value="+1">Turks and Caicos Islands +1</option>
-                                <option value="+688">Tuvalu +688</option>
-                                <option value="+256">Uganda +256</option>
-                                <option value="+380">Ukraine +380</option>
-                                <option value="+971">United Arab Emirates +971</option>
-                                <option value="+44">United Kingdom +44</option>
-                                <option value="+1">United States +1</option>
-                                <option value="+598">Uruguay +598</option>
-                                <option value="+1">US Virgin Islands +1</option>
-                                <option value="+998">Uzbekistan +998</option>
-                                <option value="+678">Vanuatu +678</option>
-                                <option value="+39">Vatican City +39</option>
-                                <option value="+58">Venezuela +58</option>
-                                <option value="+84">Vietnam +84</option>
-                                <option value="+681">Wallis and Futuna +681</option>
-                                <option value="+967">Yemen +967</option>
-                                <option value="+260">Zambia +260</option>
-                                <option value="+263">Zimbabwe +263</option>
-                        </select>
+            <div class="modal-body">
+                <form id="customerForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="customerName">Full Name</label>
+                            <input type="text" id="customerName" name="name" required>
                         </div>
-                        <input type="tel" id="customerPhone" name="phone" placeholder="Enter phone number">
+                        <div class="form-group">
+                            <label for="customerEmail">Email</label>
+                            <input type="email" id="customerEmail" name="email">
+                        </div>
                     </div>
-                    <div id="phoneError" class="error-message"></div>
-                </div>
-                <div class="form-group">
-                    <label for="customerAddress">Address</label>
-                    <textarea id="customerAddress" name="address"></textarea>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-outline modal-cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
+                    <div class="form-group">
+                        <label for="customerPhone">Phone Number</label>
+                        <div class="phone-input-group">
+                            <div class="country-code-wrapper">
+                                <input type="text" id="customerCountryCodeSearch" class="country-code-search" placeholder="Search country..." autocomplete="off">
+                                <select id="customerCountryCode" name="country_code" class="country-code-select">
+                                    <option value="+95" selected>Myanmar +95</option>
+                                    <option value="+1">United States +1</option>
+                                    <option value="+44">United Kingdom +44</option>
+                                    <option value="+86">China +86</option>
+                                    <option value="+91">India +91</option>
+                                    <option value="+81">Japan +81</option>
+                                    <option value="+82">South Korea +82</option>
+                                    <option value="+66">Thailand +66</option>
+                                    <option value="+65">Singapore +65</option>
+                                    <option value="+60">Malaysia +60</option>
+                                </select>
+                            </div>
+                            <input type="tel" id="customerPhone" name="phone" placeholder="Enter phone number">
+                        </div>
+                        <div id="phoneError" class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerAddress">Address</label>
+                        <textarea id="customerAddress" name="address" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost modal-cancel">Cancel</button>
+                <button type="submit" form="customerForm" class="btn btn-primary">Save Customer</button>
+            </div>
         </div>
     </div>
 
     <div id="userModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container">
             <div class="modal-header">
                 <h3 id="userModalTitle">Add User</h3>
-                <button class="modal-close">&times;</button>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <form id="userForm">
-                <div class="form-group">
-                    <label for="userName">Name</label>
-                    <input type="text" id="userName" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="userUsername">Username</label>
-                    <input type="text" id="userUsername" name="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="userEmail">Email</label>
-                    <input type="email" id="userEmail" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="userPassword">Password</label>
-                    <input type="password" id="userPassword" name="password" required>
-                    <small class="form-hint">Leave blank to keep current password (when editing)</small>
-                </div>
-                <div class="form-group">
-                    <label for="userRole">Role</label>
-                    <select id="userRole" name="role" required>
-                        <option value="cashier">Cashier</option>
-                        <option value="manager">Manager</option>
-                        <option value="admin">Administrator</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="userActive">Status</label>
-                    <div class="status-dropdown">
-                        <select id="userActive" name="is_active" required>
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
-                        </select>
+            <div class="modal-body">
+                <form id="userForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="userName">Full Name</label>
+                            <input type="text" id="userName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userUsername">Username</label>
+                            <input type="text" id="userUsername" name="username" required>
+                        </div>
                     </div>
-                </div>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-outline modal-cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
+                    <div class="form-group">
+                        <label for="userEmail">Email</label>
+                        <input type="email" id="userEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPassword">Password</label>
+                        <input type="password" id="userPassword" name="password" required>
+                        <small class="form-hint">Leave blank to keep current password (when editing)</small>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="userRole">Role</label>
+                            <select id="userRole" name="role" required>
+                                <option value="cashier">Cashier</option>
+                                <option value="manager">Manager</option>
+                                <option value="admin">Administrator</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="userActive">Status</label>
+                            <select id="userActive" name="is_active" required>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost modal-cancel">Cancel</button>
+                <button type="submit" form="userForm" class="btn btn-primary">Save User</button>
+            </div>
         </div>
     </div>
 
