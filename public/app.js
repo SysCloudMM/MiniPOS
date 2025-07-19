@@ -297,9 +297,13 @@ class MiniPOS {
     async loadInitialData() {
         await Promise.all([
             this.loadProducts(),
-            this.loadCustomers(),
-            this.loadUsers()
+            this.loadCustomers()
         ]);
+        
+        // Only load users if user has admin or manager role
+        if (this.user && ['admin', 'manager'].includes(this.user.role)) {
+            await this.loadUsers();
+        }
     }
 
     async loadProducts() {
