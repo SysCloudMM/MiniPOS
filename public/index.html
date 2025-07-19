@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiniPOS System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="./styles.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="screen active">
+            <div class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <i class="fas fa-cash-register"></i>
+                        <h1>MiniPOS</h1>
+                        <p>Point of Sale System</p>
+                    </div>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login
+                        </button>
+                    </form>
+                    <div class="demo-credentials">
+                        <p><strong>Demo Credentials:</strong></p>
+                        <p>Username: admin | Password: password</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div id="dashboardScreen" class="screen">
+            <nav class="navbar">
+                <div class="nav-brand">
+                    <i class="fas fa-cash-register"></i>
+                    <span>MiniPOS</span>
+                </div>
+                <div class="nav-user">
+                    <span id="userInfo"></span>
+                    <button id="logoutBtn" class="btn btn-outline">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
+                </div>
+            </nav>
+
+            <div class="main-content">
+                <aside class="sidebar">
+                    <ul class="nav-menu">
+                        <li><a href="#" data-section="pos" class="nav-link active">
+                            <i class="fas fa-shopping-cart"></i>
+                            Point of Sale
+                        </a></li>
+                        <li><a href="#" data-section="products" class="nav-link">
+                            <i class="fas fa-box"></i>
+                            Products
+                        </a></li>
+                        <li><a href="#" data-section="customers" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            Customers
+                        </a></li>
+                        <li><a href="#" data-section="sales" class="nav-link">
+                            <i class="fas fa-receipt"></i>
+                            Sales History
+                        </a></li>
+                        <li><a href="#" data-section="reports" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            Reports
+                        </a></li>
+                    </ul>
+                </aside>
+
+                <main class="content">
+                    <!-- POS Section -->
+                    <section id="posSection" class="content-section active">
+                        <div class="pos-container">
+                            <div class="pos-left">
+                                <div class="product-search">
+                                    <input type="text" id="productSearch" placeholder="Search products or scan barcode...">
+                                    <button id="searchBtn" class="btn btn-primary">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <div class="product-grid" id="productGrid">
+                                    <!-- Products will be loaded here -->
+                                </div>
+                            </div>
+                            <div class="pos-right">
+                                <div class="cart-header">
+                                    <h3>Current Sale</h3>
+                                    <button id="clearCart" class="btn btn-outline">Clear</button>
+                                </div>
+                                <div class="cart-items" id="cartItems">
+                                    <!-- Cart items will appear here -->
+                                </div>
+                                <div class="cart-summary">
+                                    <div class="summary-row">
+                                        <span>Subtotal:</span>
+                                        <span id="subtotal">$0.00</span>
+                                    </div>
+                                    <div class="summary-row">
+                                        <span>Tax:</span>
+                                        <span id="tax">$0.00</span>
+                                    </div>
+                                    <div class="summary-row total">
+                                        <span>Total:</span>
+                                        <span id="total">$0.00</span>
+                                    </div>
+                                </div>
+                                <div class="checkout-actions">
+                                    <select id="paymentMethod" class="form-control">
+                                        <option value="cash">Cash</option>
+                                        <option value="card">Card</option>
+                                        <option value="digital">Digital</option>
+                                    </select>
+                                    <button id="checkoutBtn" class="btn btn-success btn-large">
+                                        <i class="fas fa-credit-card"></i>
+                                        Checkout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Products Section -->
+                    <section id="productsSection" class="content-section">
+                        <div class="section-header">
+                            <h2>Products</h2>
+                            <button id="addProductBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Add Product
+                            </button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Category</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productsTable">
+                                    <!-- Products will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Customers Section -->
+                    <section id="customersSection" class="content-section">
+                        <div class="section-header">
+                            <h2>Customers</h2>
+                            <button id="addCustomerBtn" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Add Customer
+                            </button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customersTable">
+                                    <!-- Customers will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Sales Section -->
+                    <section id="salesSection" class="content-section">
+                        <div class="section-header">
+                            <h2>Sales History</h2>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Customer</th>
+                                        <th>Total</th>
+                                        <th>Payment</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="salesTable">
+                                    <!-- Sales will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Reports Section -->
+                    <section id="reportsSection" class="content-section">
+                        <div class="section-header">
+                            <h2>Reports</h2>
+                        </div>
+                        <div class="reports-grid">
+                            <div class="report-card">
+                                <h3>Sales Summary</h3>
+                                <div id="salesSummary">
+                                    <!-- Sales summary will be loaded here -->
+                                </div>
+                            </div>
+                            <div class="report-card">
+                                <h3>Top Products</h3>
+                                <div id="topProducts">
+                                    <!-- Top products will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="productModalTitle">Add Product</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="productForm">
+                <div class="form-group">
+                    <label for="productName">Name</label>
+                    <input type="text" id="productName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="productPrice">Price</label>
+                    <input type="number" id="productPrice" name="price" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="productStock">Stock Quantity</label>
+                    <input type="number" id="productStock" name="stock_quantity" required>
+                </div>
+                <div class="form-group">
+                    <label for="productCategory">Category</label>
+                    <select id="productCategory" name="category_id" required>
+                        <option value="1">General</option>
+                        <option value="2">Electronics</option>
+                        <option value="3">Clothing</option>
+                        <option value="4">Food & Beverages</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="customerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="customerModalTitle">Add Customer</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="customerForm">
+                <div class="form-group">
+                    <label for="customerName">Name</label>
+                    <input type="text" id="customerName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerEmail">Email</label>
+                    <input type="email" id="customerEmail" name="email">
+                </div>
+                <div class="form-group">
+                    <label for="customerPhone">Phone</label>
+                    <div class="phone-input-group">
+                        <div class="country-code-wrapper">
+                            <input type="text" id="customerCountryCodeSearch" class="country-code-search" placeholder="Search country..." autocomplete="off">
+                            <select id="customerCountryCode" name="country_code" class="country-code-select">
+                            <option value="+1">🇺🇸 US +1</option>
+                            <option value="+1">🇨🇦 CA +1</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+33">🇫🇷 +33</option>
+                            <option value="+49">🇩🇪 +49</option>
+                            <option value="+39">🇮🇹 +39</option>
+                            <option value="+34">🇪🇸 +34</option>
+                            <option value="+31">🇳🇱 +31</option>
+                            <option value="+32">🇧🇪 +32</option>
+                            <option value="+41">🇨🇭 +41</option>
+                            <option value="+43">🇦🇹 +43</option>
+                            <option value="+45">🇩🇰 +45</option>
+                            <option value="+46">🇸🇪 +46</option>
+                            <option value="+47">🇳🇴 +47</option>
+                            <option value="+358">🇫🇮 +358</option>
+                            <option value="+351">🇵🇹 +351</option>
+                            <option value="+30">🇬🇷 +30</option>
+                            <option value="+48">🇵🇱 +48</option>
+                            <option value="+420">🇨🇿 +420</option>
+                            <option value="+36">🇭🇺 +36</option>
+                            <option value="+385">🇭🇷 +385</option>
+                            <option value="+386">🇸🇮 +386</option>
+                            <option value="+421">🇸🇰 +421</option>
+                            <option value="+372">🇪🇪 +372</option>
+                            <option value="+371">🇱🇻 +371</option>
+                            <option value="+370">🇱🇹 +370</option>
+                            <option value="+7">🇷🇺 +7</option>
+                            <option value="+380">🇺🇦 +380</option>
+                            <option value="+375">🇧🇾 +375</option>
+                            <option value="+373">🇲🇩 +373</option>
+                            <option value="+374">🇦🇲 +374</option>
+                            <option value="+995">🇬🇪 +995</option>
+                            <option value="+994">🇦🇿 +994</option>
+                            <option value="+998">🇺🇿 +998</option>
+                            <option value="+996">🇰🇬 +996</option>
+                            <option value="+992">🇹🇯 +992</option>
+                            <option value="+993">🇹🇲 +993</option>
+                            <option value="+7">🇰🇿 +7</option>
+                            <option value="+86">🇨🇳 +86</option>
+                            <option value="+81">🇯🇵 +81</option>
+                            <option value="+82">🇰🇷 +82</option>
+                            <option value="+91">🇮🇳 +91</option>
+                            <option value="+92">🇵🇰 +92</option>
+                            <option value="+880">🇧🇩 +880</option>
+                            <option value="+94">🇱🇰 +94</option>
+                            <option value="+977">🇳🇵 +977</option>
+                            <option value="+975">🇧🇹 +975</option>
+                            <option value="+960">🇲🇻 +960</option>
+                            <option value="+66">🇹🇭 +66</option>
+                            <option value="+84">🇻🇳 +84</option>
+                            <option value="+855">🇰🇭 +855</option>
+                            <option value="+856">🇱🇦 +856</option>
+                            <option value="+95">🇲🇲 Myanmar +95</option>
+                            <option value="+65">🇸🇬 +65</option>
+                            <option value="+60">🇲🇾 +60</option>
+                            <option value="+62">🇮🇩 +62</option>
+                            <option value="+63">🇵🇭 +63</option>
+                            <option value="+673">🇧🇳 +673</option>
+                            <option value="+61">🇦🇺 +61</option>
+                            <option value="+64">🇳🇿 +64</option>
+                            <option value="+679">🇫🇯 +679</option>
+                            <option value="+685">🇼🇸 +685</option>
+                            <option value="+676">🇹🇴 +676</option>
+                            <option value="+678">🇻🇺 +678</option>
+                            <option value="+687">🇳🇨 +687</option>
+                            <option value="+689">🇵🇫 +689</option>
+                            <option value="+20">🇪🇬 +20</option>
+                            <option value="+27">🇿🇦 +27</option>
+                            <option value="+234">🇳🇬 +234</option>
+                            <option value="+233">🇬🇭 +233</option>
+                            <option value="+254">🇰🇪 +254</option>
+                            <option value="+255">🇹🇿 +255</option>
+                            <option value="+256">🇺🇬 +256</option>
+                            <option value="+250">🇷🇼 +250</option>
+                            <option value="+251">🇪🇹 +251</option>
+                            <option value="+252">🇸🇴 +252</option>
+                            <option value="+253">🇩🇯 +253</option>
+                            <option value="+291">🇪🇷 +291</option>
+                            <option value="+249">🇸🇩 +249</option>
+                            <option value="+211">🇸🇸 +211</option>
+                            <option value="+235">🇹🇩 +235</option>
+                            <option value="+236">🇨🇫 +236</option>
+                            <option value="+237">🇨🇲 +237</option>
+                            <option value="+240">🇬🇶 +240</option>
+                            <option value="+241">🇬🇦 +241</option>
+                            <option value="+242">🇨🇬 +242</option>
+                            <option value="+243">🇨🇩 +243</option>
+                            <option value="+244">🇦🇴 +244</option>
+                            <option value="+245">🇬🇼 +245</option>
+                            <option value="+238">🇨🇻 +238</option>
+                            <option value="+239">🇸🇹 +239</option>
+                            <option value="+220">🇬🇲 +220</option>
+                            <option value="+221">🇸🇳 +221</option>
+                            <option value="+222">🇲🇷 +222</option>
+                            <option value="+223">🇲🇱 +223</option>
+                            <option value="+224">🇬🇳 +224</option>
+                            <option value="+225">🇨🇮 +225</option>
+                            <option value="+226">🇧🇫 +226</option>
+                            <option value="+227">🇳🇪 +227</option>
+                            <option value="+228">🇹🇬 +228</option>
+                            <option value="+229">🇧🇯 +229</option>
+                            <option value="+230">🇲🇺 +230</option>
+                            <option value="+231">🇱🇷 +231</option>
+                            <option value="+232">🇸🇱 +232</option>
+                            <option value="+212">🇲🇦 +212</option>
+                            <option value="+213">🇩🇿 +213</option>
+                            <option value="+216">🇹🇳 +216</option>
+                            <option value="+218">🇱🇾 +218</option>
+                            <option value="+52">🇲🇽 +52</option>
+                            <option value="+54">🇦🇷 +54</option>
+                            <option value="+55">🇧🇷 +55</option>
+                            <option value="+56">🇨🇱 +56</option>
+                            <option value="+57">🇨🇴 +57</option>
+                            <option value="+58">🇻🇪 +58</option>
+                            <option value="+51">🇵🇪 +51</option>
+                            <option value="+593">🇪🇨 +593</option>
+                            <option value="+591">🇧🇴 +591</option>
+                            <option value="+595">🇵🇾 +595</option>
+                            <option value="+598">🇺🇾 +598</option>
+                            <option value="+597">🇸🇷 +597</option>
+                            <option value="+594">🇬🇫 +594</option>
+                            <option value="+592">🇬🇾 +592</option>
+                            <option value="+590">🇬🇵 +590</option>
+                            <option value="+596">🇲🇶 +596</option>
+                            <option value="+508">🇵🇲 +508</option>
+                            <option value="+502">🇬🇹 +502</option>
+                            <option value="+503">🇸🇻 +503</option>
+                            <option value="+504">🇭🇳 +504</option>
+                            <option value="+505">🇳🇮 +505</option>
+                            <option value="+506">🇨🇷 +506</option>
+                            <option value="+507">🇵🇦 +507</option>
+                            <option value="+501">🇧🇿 +501</option>
+                            <option value="+1">🇨🇦 +1</option>
+                        </select>
+                        </div>
+                        <input type="tel" id="customerPhone" name="phone" placeholder="Enter phone number">
+                    </div>
+                    <div id="phoneError" class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="customerAddress">Address</label>
+                    <textarea id="customerAddress" name="address"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline modal-cancel">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="./app.js"></script>
+</body>
+</html>
