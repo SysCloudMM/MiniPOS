@@ -27,6 +27,7 @@ app.use(express.static('public'));
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/sales', saleRoutes);
