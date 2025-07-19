@@ -1754,6 +1754,109 @@ textarea:focus {
     }
 }
 
+/* Settings Grid - Responsive */
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .settings-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+}
+
+.settings-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 2px solid transparent;
+}
+
+@media (min-width: 768px) {
+    .settings-card {
+        padding: 2rem;
+    }
+}
+
+.settings-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+    border-color: #667eea;
+}
+
+.settings-card-icon {
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #667eea;
+    font-size: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .settings-card-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.75rem;
+    }
+}
+
+.settings-card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.settings-card-content h3 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+@media (min-width: 768px) {
+    .settings-card-content h3 {
+        font-size: 1.25rem;
+    }
+}
+
+.settings-card-content p {
+    margin: 0;
+    color: #666;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+@media (min-width: 768px) {
+    .settings-card-content p {
+        font-size: 0.95rem;
+    }
+}
+
+.settings-card-arrow {
+    flex-shrink: 0;
+    color: #999;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.settings-card:hover .settings-card-arrow {
+    color: #667eea;
+    transform: translateX(3px);
+}
+
 /* Sale Details Modal - Responsive */
 .sale-details {
     font-family: 'Pyidaungsu', sans-serif;

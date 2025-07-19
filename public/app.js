@@ -193,12 +193,12 @@ const showDashboard = () => {
     const userName = currentUser ? (currentUser.name || currentUser.username) : 'User';
     document.getElementById('userInfo').textContent = `Welcome, ${userName}`;
     
-    // Show/hide user management based on role
-    const userManagementLink = document.getElementById('userManagementLink');
+    // Show/hide settings based on role
+    const settingsLink = document.getElementById('settingsLink');
     if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager')) {
-        userManagementLink.style.display = 'block';
+        settingsLink.style.display = 'block';
     } else {
-        userManagementLink.style.display = 'none';
+        settingsLink.style.display = 'none';
     }
     
     showSection('pos');
@@ -229,6 +229,9 @@ const showSection = (sectionName) => {
         case 'customers':
             loadCustomers();
             break;
+        case 'settings':
+            // Settings section doesn't need to load data initially
+            break;
         case 'users':
             loadUsers();
             break;
@@ -237,6 +240,15 @@ const showSection = (sectionName) => {
             break;
         case 'reports':
             loadReports();
+            break;
+    }
+};
+
+// Settings subsection navigation
+const showSettingsSubsection = (subsection) => {
+    switch(subsection) {
+        case 'users':
+            showSection('users');
             break;
     }
 };
