@@ -382,6 +382,22 @@ const loadProducts = async () => {
         renderProductGrid();
         // Load categories for dropdown
         if (categories.length === 0) {
+   // Users pagination
+   document.getElementById('usersPrevBtn').addEventListener('click', () => {
+       if (currentUsersPage > 1) {
+           currentUsersPage--;
+           renderUsers();
+       }
+   });
+   
+   document.getElementById('usersNextBtn').addEventListener('click', () => {
+       const totalPages = Math.ceil(users.length / itemsPerPage);
+       if (currentUsersPage < totalPages) {
+           currentUsersPage++;
+           renderUsers();
+       }
+   });
+   
             await loadCategories();
         }
     } catch (error) {
