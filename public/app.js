@@ -132,10 +132,45 @@ const checkAuth = async () => {
     }
 
     try {
-        // Try to fetch user data to validate token
-        await loadProducts();
+        // Validate token by making an authenticated API call
+        const response = await apiCall('/products');
+        
+        // If we get here, token is valid, but we need to get user info
+        // Try to decode the token to get user info (basic decode, not verification)
+        const tokenParts = token.split('.');
+        if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            
+            // Check if token is expired
+            if (payload.exp && payload.exp * 1000 < Date.now()) {
+                throw new Error('Token expired');
+            }
+            
+            // Set current user from token payload
+            currentUser = {
+                id: payload.userId,
+                username: payload.username,
+                role: payload.role,
+                name: payload.username // We'll get the full name from API if needed
+            };
+            
+            // Try to get full user details
+            try {
+                const userResponse = await apiCall(`/users/${payload.userId}`);
+                if (userResponse.success) {
+                    currentUser.name = userResponse.data.name;
+                    currentUser.email = userResponse.data.email;
+                }
+            } catch (userError) {
+                // If we can't get user details, that's okay, we have basic info
+                console.log('Could not fetch user details, using token info');
+            }
+        }
+        
+        showDashboard();
         return true;
     } catch (error) {
+        console.log('Token validation failed:', error.message);
         logout();
         return false;
     }
@@ -155,7 +190,7 @@ const showLogin = () => {
 
 const showDashboard = () => {
     showScreen('dashboardScreen');
-    document.getElementById('userInfo').textContent = currentUser ? currentUser.name : 'User';
+    document.getElementById('userInfo').textContent = currentUser ? (currentUser.name || currentUser.username) : 'User';
     
     // Show/hide user management based on role
     const userManagementLink = document.getElementById('userManagementLink');
@@ -1048,6 +1083,9 @@ const setupPhoneValidation = () => {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
+    // Check authentication on page load
+    checkAuth();
+    
     // Login form
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1202,6 +1240,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    // Check authentication on page load
-    checkAuth();
 });
