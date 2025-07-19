@@ -194,6 +194,14 @@ router.put('/:id', async (req, res) => {
     let params = [name, username, email];
 
     if (req.user.role === 'admin') {
+      // Prevent admin from disabling their own account
+      if (req.user.id === parseInt(req.params.id) && !is_active) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cannot disable your own account'
+        });
+      }
+      
       updateSql += ', role = ?, is_active = ?';
       params.push(role, is_active);
     }
