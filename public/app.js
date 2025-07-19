@@ -1172,11 +1172,6 @@ class MiniPOS {
                     <button class="btn btn-small btn-outline" onclick="app.editUser(${user.id})" title="Edit User">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-small ${user.is_active ? 'btn-warning' : 'btn-success'}" 
-                            onclick="app.toggleUserStatus(${user.id})" 
-                            title="${user.is_active ? 'Disable' : 'Enable'} User">
-                        <i class="fas fa-${user.is_active ? 'ban' : 'check'}"></i>
-                    </button>
                     <button class="btn btn-small btn-danger" onclick="app.deleteUser(${user.id})" title="Delete User">
                         <i class="fas fa-trash"></i>
                     </button>
@@ -1263,21 +1258,6 @@ class MiniPOS {
             }
         } catch (error) {
             this.showError('Failed to load user: ' + error.message);
-        }
-    }
-
-    async toggleUserStatus(id) {
-        try {
-            const response = await this.apiCall(`/api/users/${id}/toggle-status`, 'PATCH');
-            if (response.success) {
-                this.showSuccess(response.message);
-                this.loadUsersTable();
-                this.loadUsers();
-            } else {
-                this.showError('Failed to toggle user status: ' + response.message);
-            }
-        } catch (error) {
-            this.showError('Failed to toggle user status: ' + error.message);
         }
     }
 
