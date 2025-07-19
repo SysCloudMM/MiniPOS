@@ -1,1402 +1,1010 @@
-// MiniPOS Frontend Application
-class MiniPOS {
-    constructor() {
-        this.token = localStorage.getItem('minipos_token');
-        this.user = JSON.parse(localStorage.getItem('minipos_user') || 'null');
-        this.cart = [];
-        this.products = [];
-        this.customers = [];
-        this.users = [];
-        this.sales = [];
-        this.loginAttempts = 0;
-        this.lockoutEndTime = null;
-        
-        this.init();
-    }
+// Global variables
+let currentUser = null;
+let cart = [];
+let products = [];
+let customers = [];
+let users = [];
 
-    init() {
-        this.setupEventListeners();
-        
-        console.log('Initializing with token:', this.token);
-        console.log('Initializing with user:', this.user);
-        
-        if (this.token && this.user) {
-            this.showDashboard();
-            this.loadInitialData();
-        } else {
-            this.showLogin();
+// API Base URL
+const API_BASE = '/api';
+
+// Utility functions
+const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-MM', {
+        style: 'currency',
+        currency: 'MMK',
+        minimumFractionDigits: 0
+    }).format(amount).replace('MMK', '') + ' MMK';
+};
+
+const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-MM', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+};
+
+const showError = (message) => {
+    // Create or update error message
+    let errorDiv = document.getElementById('errorMessage');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'errorMessage';
+        errorDiv.className = 'login-error';
+        document.querySelector('.login-card form').appendChild(errorDiv);
+    }
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        if (errorDiv) {
+            errorDiv.style.display = 'none';
         }
-    }
+    }, 5000);
+};
 
-    setupEventListeners() {
-        // Login form
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleLogin();
-        });
-
-        // Logout button
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            this.handleLogout();
-        });
-
-        // Navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const section = e.target.closest('.nav-link').dataset.section;
-                this.showSection(section);
-            });
-        });
-
-        // POS functionality
-        document.getElementById('productSearch').addEventListener('input', (e) => {
-            this.searchProducts(e.target.value);
-        });
-
-        document.getElementById('clearCart').addEventListener('click', () => {
-            this.clearCart();
-        });
-
-        document.getElementById('checkoutBtn').addEventListener('click', () => {
-            this.processCheckout();
-        });
-
-        // Modal controls
-        this.setupModalControls();
-
-        // Form submissions
-        document.getElementById('productForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleProductSubmit();
-        });
-
-        document.getElementById('customerForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleCustomerSubmit();
-        });
-
-        // Phone validation
-        document.getElementById('customerPhone').addEventListener('input', (e) => {
-            this.handlePhoneInput(e.target.value);
-        });
-
-        document.getElementById('customerCountryCode').addEventListener('change', () => {
-            const phoneInput = document.getElementById('customerPhone');
-            if (phoneInput.value) {
-                this.validatePhoneNumber(phoneInput.value);
-            }
-        });
-
-        // Country code search functionality
-        document.getElementById('customerCountryCodeSearch').addEventListener('input', (e) => {
-            this.filterCountryCodes(e.target.value);
-        });
-
-        document.getElementById('customerCountryCodeSearch').addEventListener('focus', () => {
-            this.showCountryDropdown();
-        });
-
-        document.getElementById('customerCountryCodeSearch').addEventListener('blur', () => {
-            setTimeout(() => this.hideCountryDropdown(), 150);
-        });
-
-        // Handle country selection from dropdown
-        document.getElementById('customerCountryCode').addEventListener('change', (e) => {
-            this.selectCountryCode(e.target.value);
-        });
-
-        // Click outside to close dropdown
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.country-code-wrapper')) {
-                this.hideCountryDropdown();
-            }
-        });
-
-        // Add buttons
-        document.getElementById('addProductBtn').addEventListener('click', () => {
-            this.showProductModal();
-        });
-
-        document.getElementById('addCustomerBtn').addEventListener('click', () => {
-            this.showCustomerModal();
-        });
-
-        document.getElementById('addUserBtn').addEventListener('click', () => {
-            this.showUserModal();
-        });
-
-        // User form submission
-        document.getElementById('userForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleUserSubmit();
-        });
-    }
-
-    setupModalControls() {
-        // Close modal buttons
-        document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.closeModals();
-            });
-        });
-
-        // Close modal on backdrop click
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    this.closeModals();
-                }
-            });
-        });
-    }
-
-    // Check if login is currently locked out
-    isLoginLocked() {
-        if (this.lockoutEndTime && Date.now() < this.lockoutEndTime) {
-            return true;
+const showAlert = (message, type = 'info') => {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        background: ${type === 'success' ? '#d4edda' : type === 'error' ? '#f8d7da' : '#d1ecf1'};
+        color: ${type === 'success' ? '#155724' : type === 'error' ? '#721c24' : '#0c5460'};
+        border: 1px solid ${type === 'success' ? '#c3e6cb' : type === 'error' ? '#f5c6cb' : '#bee5eb'};
+        border-radius: 6px;
+        z-index: 9999;
+        max-width: 300px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    alertDiv.textContent = message;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.parentNode.removeChild(alertDiv);
         }
-        if (this.lockoutEndTime && Date.now() >= this.lockoutEndTime) {
-            // Reset attempts after lockout period
-            this.loginAttempts = 0;
-            this.lockoutEndTime = null;
+    }, 5000);
+};
+
+// API functions
+const apiCall = async (endpoint, options = {}) => {
+    const token = localStorage.getItem('token');
+    const defaultOptions = {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` })
         }
+    };
+
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+        ...defaultOptions,
+        ...options,
+        headers: { ...defaultOptions.headers, ...options.headers }
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+        throw new Error(data.message || 'API request failed');
+    }
+    
+    return data;
+};
+
+// Authentication
+const login = async (username, password) => {
+    try {
+        const response = await apiCall('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ username, password })
+        });
+
+        localStorage.setItem('token', response.data.token);
+        currentUser = response.data.user;
+        
+        showDashboard();
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
+
+const logout = () => {
+    localStorage.removeItem('token');
+    currentUser = null;
+    cart = [];
+    showLogin();
+};
+
+const checkAuth = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        showLogin();
         return false;
     }
 
-    // Get remaining lockout time in seconds
-    getRemainingLockoutTime() {
-        if (this.lockoutEndTime && Date.now() < this.lockoutEndTime) {
-            return Math.ceil((this.lockoutEndTime - Date.now()) / 1000);
-        }
-        return 0;
+    try {
+        // Try to fetch user data to validate token
+        await loadProducts();
+        return true;
+    } catch (error) {
+        logout();
+        return false;
     }
+};
 
-    // Update lockout timer display
-    updateLockoutTimer() {
-        const remainingTime = this.getRemainingLockoutTime();
-        if (remainingTime > 0) {
-            const minutes = Math.floor(remainingTime / 60);
-            const seconds = remainingTime % 60;
-            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            this.showLoginError(`Too many failed attempts. Please wait ${timeString} before trying again.`);
-            
-            setTimeout(() => this.updateLockoutTimer(), 1000);
-        }
-    }
+// Screen management
+const showScreen = (screenId) => {
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    document.getElementById(screenId).classList.add('active');
+};
 
-    // Authentication
-    async handleLogin() {
-        // Check if login is locked out
-        if (this.isLoginLocked()) {
-            this.updateLockoutTimer();
-            return;
-        }
+const showLogin = () => {
+    showScreen('loginScreen');
+};
 
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        const errorContainer = document.getElementById('loginError');
-        
-        // Clear any existing error
-        if (errorContainer) {
-            errorContainer.style.display = 'none';
-        }
-
-        try {
-            const response = await this.apiCall('/api/auth/login', 'POST', {
-                username,
-                password
-            });
-
-            console.log('Login response:', response);
-
-            if (response.success) {
-                this.token = response.data.token;
-                this.user = response.data.user;
-                
-                console.log('Login successful - User data:', this.user);
-                
-                localStorage.setItem('minipos_token', this.token);
-                localStorage.setItem('minipos_user', JSON.stringify(this.user));
-                
-                // Reset login attempts on successful login
-                this.loginAttempts = 0;
-                this.lockoutEndTime = null;
-                
-                this.showDashboard();
-                this.loadInitialData();
-            } else {
-                this.loginAttempts++;
-                
-                if (this.loginAttempts >= 3) {
-                    // Lock out for 1 minute (60000 milliseconds)
-                    this.lockoutEndTime = Date.now() + 60000;
-                    this.updateLockoutTimer();
-                } else {
-                    const remainingAttempts = 3 - this.loginAttempts;
-                    this.showLoginError(`Wrong username or password. Please try again. (${remainingAttempts} attempts remaining)`);
-                }
-            }
-        } catch (error) {
-            console.error('Login error:', error);
-            this.loginAttempts++;
-            
-            if (this.loginAttempts >= 3) {
-                this.lockoutEndTime = Date.now() + 60000;
-                this.updateLockoutTimer();
-            } else {
-                const remainingAttempts = 3 - this.loginAttempts;
-                this.showLoginError(`Wrong username or password. Please try again. (${remainingAttempts} attempts remaining)`);
-            }
-        }
+const showDashboard = () => {
+    showScreen('dashboardScreen');
+    document.getElementById('userInfo').textContent = currentUser ? currentUser.name : 'User';
+    
+    // Show/hide user management based on role
+    const userManagementLink = document.getElementById('userManagementLink');
+    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager')) {
+        userManagementLink.style.display = 'block';
+    } else {
+        userManagementLink.style.display = 'none';
     }
     
-    showLoginError(message) {
-        // Remove any existing error
-        const existingError = document.querySelector('.login-error');
-        if (existingError) {
-            existingError.remove();
-        }
+    showSection('pos');
+    loadProducts();
+};
 
-        let errorContainer = document.getElementById('loginError');
-        if (!errorContainer) {
-            // Create error container if it doesn't exist
-            errorContainer = document.createElement('div');
-            errorContainer.id = 'loginError';
-            errorContainer.className = 'login-error';
-            
-            const form = document.getElementById('loginForm');
-            form.appendChild(errorContainer);
-        }
+const showSection = (sectionName) => {
+    // Update navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+    
+    // Update content sections
+    document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.getElementById(`${sectionName}Section`).classList.add('active');
+    
+    // Load section-specific data
+    switch(sectionName) {
+        case 'products':
+            loadProducts();
+            break;
+        case 'customers':
+            loadCustomers();
+            break;
+        case 'users':
+            loadUsers();
+            break;
+        case 'sales':
+            loadSales();
+            break;
+        case 'reports':
+            loadReports();
+            break;
+    }
+};
+
+// Product management
+const loadProducts = async () => {
+    try {
+        const response = await apiCall('/products');
+        products = response.data;
+        renderProducts();
+        renderProductGrid();
+    } catch (error) {
+        console.error('Failed to load products:', error);
+        showAlert('Failed to load products: ' + error.message, 'error');
+    }
+};
+
+const renderProducts = () => {
+    const tbody = document.getElementById('productsTable');
+    tbody.innerHTML = '';
+    
+    products.forEach(product => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${product.name}</td>
+            <td>${formatCurrency(product.price)}</td>
+            <td>${product.stock_quantity}</td>
+            <td>${product.category_name || 'N/A'}</td>
+            <td>
+                <button class="btn btn-small btn-warning" onclick="editProduct(${product.id})">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-small btn-danger" onclick="deleteProduct(${product.id})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+};
+
+const renderProductGrid = () => {
+    const grid = document.getElementById('productGrid');
+    grid.innerHTML = '';
+    
+    products.filter(p => p.is_active).forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.onclick = () => addToCart(product);
+        card.innerHTML = `
+            <h4>${product.name}</h4>
+            <div class="price">${formatCurrency(product.price)}</div>
+            <div class="stock">Stock: ${product.stock_quantity}</div>
+        `;
+        grid.appendChild(card);
+    });
+};
+
+const saveProduct = async (productData, isEdit = false, productId = null) => {
+    try {
+        const endpoint = isEdit ? `/products/${productId}` : '/products';
+        const method = isEdit ? 'PUT' : 'POST';
         
-        errorContainer.textContent = message;
-        errorContainer.style.display = 'block';
-        
-        // Auto-hide error after 5 seconds
-        setTimeout(() => {
-            if (errorContainer.parentNode) {
-                errorContainer.remove();
-            }
-        }, 5000);
-    }
-
-    handleLogout() {
-        this.token = null;
-        this.user = null;
-        localStorage.removeItem('minipos_token');
-        localStorage.removeItem('minipos_user');
-        this.showLogin();
-    }
-
-    // Screen Management
-    showLogin() {
-        document.getElementById('loginScreen').classList.add('active');
-        document.getElementById('dashboardScreen').classList.remove('active');
-    }
-
-    showDashboard() {
-        document.getElementById('loginScreen').classList.remove('active');
-        document.getElementById('dashboardScreen').classList.add('active');
-        document.getElementById('userInfo').textContent = `Welcome, ${this.user.name}`;
-        
-        // Hide user management link for cashiers
-        const userManagementLink = document.getElementById('userManagementLink');
-        if (this.user.role === 'cashier') {
-            userManagementLink.style.display = 'none';
-        } else {
-            userManagementLink.style.display = 'block';
-        }
-    }
-
-    showSection(sectionName) {
-        // Update navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-        });
-        document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
-
-        // Update content sections
-        document.querySelectorAll('.content-section').forEach(section => {
-            section.classList.remove('active');
-        });
-        document.getElementById(`${sectionName}Section`).classList.add('active');
-
-        // Check permissions for user management
-        if (sectionName === 'users') {
-            if (!this.user || !['admin', 'manager'].includes(this.user.role)) {
-                this.showError('You do not have permission to access User Management');
-                this.showSection('pos');
-                return;
-            }
-        }
-
-        // Load section-specific data
-        switch(sectionName) {
-            case 'pos':
-                this.loadProducts();
-                break;
-            case 'products':
-                this.loadProductsTable();
-                break;
-            case 'customers':
-                this.loadCustomersTable();
-                break;
-            case 'users':
-                this.loadUsersTable();
-                break;
-            case 'sales':
-                this.loadSalesTable();
-                break;
-            case 'reports':
-                this.loadReports();
-                break;
-        }
-    }
-
-    // API Helper
-    async apiCall(endpoint, method = 'GET', data = null) {
-        const config = {
+        const response = await apiCall(endpoint, {
             method,
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            body: JSON.stringify(productData)
+        });
+        
+        showAlert(`Product ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
+        closeModal('productModal');
+        loadProducts();
+    } catch (error) {
+        showAlert('Failed to save product: ' + error.message, 'error');
+    }
+};
+
+const editProduct = (id) => {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    
+    document.getElementById('productModalTitle').textContent = 'Edit Product';
+    document.getElementById('productName').value = product.name;
+    document.getElementById('productPrice').value = product.price;
+    document.getElementById('productStock').value = product.stock_quantity;
+    document.getElementById('productCategory').value = product.category_id;
+    
+    document.getElementById('productForm').onsubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const productData = {
+            name: formData.get('name'),
+            price: parseFloat(formData.get('price')),
+            stock_quantity: parseInt(formData.get('stock_quantity')),
+            category_id: parseInt(formData.get('category_id'))
         };
+        saveProduct(productData, true, id);
+    };
+    
+    openModal('productModal');
+};
 
-        if (this.token) {
-            config.headers['Authorization'] = `Bearer ${this.token}`;
-        }
-
-        if (data) {
-            config.body = JSON.stringify(data);
-        }
-
-        try {
-            const response = await fetch(endpoint, config);
-            
-            // Check if response is ok
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    // Token expired or invalid, logout user
-                    this.handleLogout();
-                    throw new Error('Session expired. Please login again.');
-                }
-            }
-            
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            console.error('API call error:', error);
-            throw error;
-        }
+const deleteProduct = async (id) => {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    
+    try {
+        await apiCall(`/products/${id}`, { method: 'DELETE' });
+        showAlert('Product deleted successfully!', 'success');
+        loadProducts();
+    } catch (error) {
+        showAlert('Failed to delete product: ' + error.message, 'error');
     }
+};
 
-    // Data Loading
-    async loadInitialData() {
-        await Promise.all([
-            this.loadProducts(),
-            this.loadCustomers()
-        ]);
+// Customer management
+const loadCustomers = async () => {
+    try {
+        const response = await apiCall('/customers');
+        customers = response.data;
+        renderCustomers();
+    } catch (error) {
+        console.error('Failed to load customers:', error);
+        showAlert('Failed to load customers: ' + error.message, 'error');
+    }
+};
+
+const renderCustomers = () => {
+    const tbody = document.getElementById('customersTable');
+    tbody.innerHTML = '';
+    
+    customers.forEach(customer => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${customer.name}</td>
+            <td>${customer.email || 'N/A'}</td>
+            <td>${customer.phone || 'N/A'}</td>
+            <td>
+                <button class="btn btn-small btn-warning" onclick="editCustomer(${customer.id})">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-small btn-danger" onclick="deleteCustomer(${customer.id})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+};
+
+const saveCustomer = async (customerData, isEdit = false, customerId = null) => {
+    try {
+        const endpoint = isEdit ? `/customers/${customerId}` : '/customers';
+        const method = isEdit ? 'PUT' : 'POST';
         
-        // Only load users if user has admin or manager role
-        if (this.user && ['admin', 'manager'].includes(this.user.role)) {
-            await this.loadUsers();
-        }
-    }
-
-    async loadProducts() {
-        try {
-            const response = await this.apiCall('/api/products');
-            if (response.success) {
-                this.products = response.data;
-                this.renderProductGrid();
-            }
-        } catch (error) {
-            console.error('Failed to load products:', error);
-        }
-    }
-
-    async loadCustomers() {
-        try {
-            const response = await this.apiCall('/api/customers');
-            if (response.success) {
-                this.customers = response.data;
-            }
-        } catch (error) {
-            console.error('Failed to load customers:', error);
-        }
-    }
-
-    async loadUsers() {
-        try {
-            const response = await this.apiCall('/api/users');
-            if (response.success) {
-                this.users = response.data;
-            }
-        } catch (error) {
-            console.error('Failed to load users:', error);
-        }
-    }
-
-    // POS Functionality
-    renderProductGrid() {
-        const grid = document.getElementById('productGrid');
-        grid.innerHTML = '';
-
-        this.products.forEach(product => {
-            if (product.is_active && product.stock_quantity > 0) {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-card';
-                productCard.innerHTML = `
-                    <h4>${product.name}</h4>
-                    <div class="price">${parseFloat(product.price).toFixed(0)} MMK</div>
-                    <div class="stock">Stock: ${product.stock_quantity}</div>
-                `;
-                productCard.addEventListener('click', () => {
-                    this.addToCart(product);
-                });
-                grid.appendChild(productCard);
-            }
-        });
-    }
-
-    searchProducts(query) {
-        const grid = document.getElementById('productGrid');
-        grid.innerHTML = '';
-
-        const filteredProducts = this.products.filter(product => 
-            product.is_active && 
-            product.stock_quantity > 0 &&
-            (product.name.toLowerCase().includes(query.toLowerCase()) ||
-             (product.barcode && product.barcode.includes(query)))
-        );
-
-        filteredProducts.forEach(product => {
-            const productCard = document.createElement('div');
-            productCard.className = 'product-card';
-            productCard.innerHTML = `
-                <h4>${product.name}</h4>
-                <div class="price">${parseFloat(product.price).toFixed(0)} MMK</div>
-                <div class="stock">Stock: ${product.stock_quantity}</div>
-            `;
-            productCard.addEventListener('click', () => {
-                this.addToCart(product);
-            });
-            grid.appendChild(productCard);
-        });
-    }
-
-    addToCart(product) {
-        const existingItem = this.cart.find(item => item.product_id === product.id);
-        
-        if (existingItem) {
-            if (existingItem.quantity < product.stock_quantity) {
-                existingItem.quantity++;
-            } else {
-                this.showError('Not enough stock available');
-                return;
-            }
-        } else {
-            this.cart.push({
-                product_id: product.id,
-                name: product.name,
-                price: parseFloat(product.price),
-                quantity: 1,
-                stock_available: product.stock_quantity
-            });
-        }
-        
-        this.renderCart();
-        this.updateCartSummary();
-    }
-
-    removeFromCart(productId) {
-        this.cart = this.cart.filter(item => item.product_id !== productId);
-        this.renderCart();
-        this.updateCartSummary();
-    }
-
-    updateQuantity(productId, change) {
-        const item = this.cart.find(item => item.product_id === productId);
-        if (item) {
-            const newQuantity = item.quantity + change;
-            if (newQuantity <= 0) {
-                this.removeFromCart(productId);
-            } else if (newQuantity <= item.stock_available) {
-                item.quantity = newQuantity;
-                this.renderCart();
-                this.updateCartSummary();
-            } else {
-                this.showError('Not enough stock available');
-            }
-        }
-    }
-
-    renderCart() {
-        const cartItems = document.getElementById('cartItems');
-        cartItems.innerHTML = '';
-
-        this.cart.forEach(item => {
-            const cartItem = document.createElement('div');
-            cartItem.className = 'cart-item';
-            cartItem.innerHTML = `
-                <div class="item-info">
-                    <h5>${item.name}</h5>
-                    <div class="item-price">${item.price.toFixed(0)} MMK each</div>
-                </div>
-                <div class="item-controls">
-                    <button class="qty-btn" onclick="app.updateQuantity(${item.product_id}, -1)">-</button>
-                    <span>${item.quantity}</span>
-                    <button class="qty-btn" onclick="app.updateQuantity(${item.product_id}, 1)">+</button>
-                    <button class="btn btn-danger btn-small" onclick="app.removeFromCart(${item.product_id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
-            cartItems.appendChild(cartItem);
-        });
-    }
-
-    updateCartSummary() {
-        const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const tax = subtotal * 0.1; // 10% tax
-        const total = subtotal + tax;
-
-        document.getElementById('subtotal').textContent = `${subtotal.toFixed(0)} MMK`;
-        document.getElementById('tax').textContent = `${tax.toFixed(0)} MMK`;
-        document.getElementById('total').textContent = `${total.toFixed(0)} MMK`;
-    }
-
-    clearCart() {
-        this.cart = [];
-        this.renderCart();
-        this.updateCartSummary();
-    }
-
-    async processCheckout() {
-        if (this.cart.length === 0) {
-            this.showError('Cart is empty');
-            return;
-        }
-
-        const paymentMethod = document.getElementById('paymentMethod').value;
-        const subtotal = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const tax = subtotal * 0.1;
-
-        const saleData = {
-            items: this.cart.map(item => ({
-                product_id: item.product_id,
-                quantity: item.quantity,
-                unit_price: item.price
-            })),
-            discount_amount: 0,
-            tax_amount: tax,
-            payment_method: paymentMethod
-        };
-
-        try {
-            const response = await this.apiCall('/api/sales', 'POST', saleData);
-            if (response.success) {
-                this.showSuccess('Sale completed successfully!');
-                this.clearCart();
-                await this.loadProducts(); // Refresh product stock
-            } else {
-                this.showError('Checkout failed: ' + response.message);
-            }
-        } catch (error) {
-            this.showError('Checkout failed: ' + error.message);
-        }
-    }
-
-    // Product Management
-    async loadProductsTable() {
-        try {
-            const response = await this.apiCall('/api/products');
-            if (response.success) {
-                this.renderProductsTable(response.data);
-            }
-        } catch (error) {
-            console.error('Failed to load products table:', error);
-        }
-    }
-
-    renderProductsTable(products) {
-        const tbody = document.getElementById('productsTable');
-        tbody.innerHTML = '';
-
-        products.forEach(product => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${product.name}</td>
-                <td>${parseFloat(product.price).toFixed(0)} MMK</td>
-                <td>${product.stock_quantity}</td>
-                <td>${product.category_name || 'N/A'}</td>
-                <td>
-                    <button class="btn btn-small btn-outline" onclick="app.editProduct(${product.id})">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-small btn-danger" onclick="app.deleteProduct(${product.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    showProductModal(product = null) {
-        const modal = document.getElementById('productModal');
-        const form = document.getElementById('productForm');
-        const title = document.getElementById('productModalTitle');
-
-        if (product) {
-            title.textContent = 'Edit Product';
-            document.getElementById('productName').value = product.name;
-            document.getElementById('productPrice').value = product.price;
-            document.getElementById('productStock').value = product.stock_quantity;
-            document.getElementById('productCategory').value = product.category_id;
-            form.dataset.productId = product.id;
-        } else {
-            title.textContent = 'Add Product';
-            form.reset();
-            delete form.dataset.productId;
-        }
-
-        modal.classList.add('active');
-    }
-
-    async handleProductSubmit() {
-        const form = document.getElementById('productForm');
-        const formData = new FormData(form);
-        const productData = Object.fromEntries(formData);
-        
-        // Convert numeric fields
-        productData.price = parseFloat(productData.price);
-        productData.stock_quantity = parseInt(productData.stock_quantity);
-        productData.category_id = parseInt(productData.category_id);
-
-        try {
-            let response;
-            if (form.dataset.productId) {
-                // Update existing product
-                response = await this.apiCall(`/api/products/${form.dataset.productId}`, 'PUT', productData);
-            } else {
-                // Create new product
-                response = await this.apiCall('/api/products', 'POST', productData);
-            }
-
-            if (response.success) {
-                this.showSuccess('Product saved successfully!');
-                this.closeModals();
-                this.loadProductsTable();
-                this.loadProducts(); // Refresh POS products
-            } else {
-                this.showError('Failed to save product: ' + response.message);
-            }
-        } catch (error) {
-            this.showError('Failed to save product: ' + error.message);
-        }
-    }
-
-    async editProduct(id) {
-        try {
-            const response = await this.apiCall(`/api/products/${id}`);
-            if (response.success) {
-                this.showProductModal(response.data);
-            }
-        } catch (error) {
-            this.showError('Failed to load product: ' + error.message);
-        }
-    }
-
-    async deleteProduct(id) {
-        if (confirm('Are you sure you want to delete this product?')) {
-            try {
-                const response = await this.apiCall(`/api/products/${id}`, 'DELETE');
-                if (response.success) {
-                    this.showSuccess('Product deleted successfully!');
-                    this.loadProductsTable();
-                    this.loadProducts();
-                } else {
-                    this.showError('Failed to delete product: ' + response.message);
-                }
-            } catch (error) {
-                this.showError('Failed to delete product: ' + error.message);
-            }
-        }
-    }
-
-    // Phone input handling with auto country detection
-    handlePhoneInput(phoneNumber) {
-        // Check if user typed a country code at the beginning
-        if (phoneNumber.startsWith('+')) {
-            const possibleCode = this.detectCountryCode(phoneNumber);
-            if (possibleCode) {
-                document.getElementById('customerCountryCode').value = possibleCode;
-                document.getElementById('customerCountryCodeSearch').value = this.getCountryName(possibleCode);
-                
-                // Remove the country code from the phone input
-                const numberWithoutCode = phoneNumber.replace(possibleCode, '').trim();
-                document.getElementById('customerPhone').value = numberWithoutCode;
-                
-                this.validatePhoneNumber(numberWithoutCode);
-                return;
-            }
-        }
-        
-        this.validatePhoneNumber(phoneNumber);
-    }
-
-    // Detect country code from phone input
-    detectCountryCode(phoneNumber) {
-        const countryCodes = [
-            '+1', '+44', '+33', '+49', '+39', '+34', '+31', '+32', '+41', '+43',
-            '+45', '+46', '+47', '+358', '+351', '+30', '+48', '+420', '+36',
-            '+385', '+386', '+421', '+372', '+371', '+370', '+7', '+380', '+375',
-            '+373', '+374', '+995', '+994', '+998', '+996', '+992', '+993',
-            '+86', '+81', '+82', '+91', '+92', '+880', '+94', '+977', '+975',
-            '+960', '+66', '+84', '+855', '+856', '+95', '+65', '+60', '+62',
-            '+63', '+673', '+61', '+64', '+679', '+685', '+676', '+678', '+687',
-            '+689', '+20', '+27', '+234', '+233', '+254', '+255', '+256', '+250',
-            '+251', '+252', '+253', '+291', '+249', '+211', '+235', '+236',
-            '+237', '+240', '+241', '+242', '+243', '+244', '+245', '+238',
-            '+239', '+220', '+221', '+222', '+223', '+224', '+225', '+226',
-            '+227', '+228', '+229', '+230', '+231', '+232', '+212', '+213',
-            '+216', '+218', '+52', '+54', '+55', '+56', '+57', '+58', '+51',
-            '+593', '+591', '+595', '+598', '+597', '+594', '+592', '+590',
-            '+596', '+508', '+502', '+503', '+504', '+505', '+506', '+507', '+501'
-        ];
-        
-        // Sort by length (longest first) to match longer codes first
-        countryCodes.sort((a, b) => b.length - a.length);
-        
-        for (const code of countryCodes) {
-            if (phoneNumber.startsWith(code)) {
-                return code;
-            }
-        }
-        
-        return null;
-    }
-
-    // Get country name from country code
-    getCountryName(countryCode) {
-        const countryNames = {
-            '+1': 'United States +1',
-            '+44': 'United Kingdom +44',
-            '+33': 'France +33',
-            '+49': 'Germany +49',
-            '+39': 'Italy +39',
-            '+34': 'Spain +34',
-            '+31': 'Netherlands +31',
-            '+32': 'Belgium +32',
-            '+41': 'Switzerland +41',
-            '+43': 'Austria +43',
-            '+45': 'Denmark +45',
-            '+46': 'Sweden +46',
-            '+47': 'Norway +47',
-            '+358': 'Finland +358',
-            '+66': 'Thailand +66',
-            '+95': 'Myanmar +95',
-            '+91': 'India +91',
-            '+86': 'China +86',
-            '+81': 'Japan +81',
-            '+82': 'South Korea +82',
-            '+61': 'Australia +61',
-            '+64': 'New Zealand +64',
-        };
-        
-        return countryNames[countryCode] || countryCode;
-    }
-
-    // Filter country codes based on search
-    filterCountryCodes(searchTerm) {
-        const select = document.getElementById('customerCountryCode');
-        const options = select.querySelectorAll('option');
-        
-        options.forEach(option => {
-            const text = option.textContent.toLowerCase();
-            const value = option.value.toLowerCase();
-            const matches = text.includes(searchTerm.toLowerCase()) || 
-                          value.includes(searchTerm.toLowerCase());
-            
-            option.style.display = matches ? 'block' : 'none';
+        const response = await apiCall(endpoint, {
+            method,
+            body: JSON.stringify(customerData)
         });
         
-        this.showCountryDropdown();
+        showAlert(`Customer ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
+        closeModal('customerModal');
+        loadCustomers();
+    } catch (error) {
+        showAlert('Failed to save customer: ' + error.message, 'error');
     }
+};
 
-    // Show country dropdown
-    showCountryDropdown() {
-        const select = document.getElementById('customerCountryCode');
-        const search = document.getElementById('customerCountryCodeSearch');
-        
-        select.classList.add('filtered');
-        const visibleOptions = select.querySelectorAll('option[style*="block"], option:not([style*="none"])');
-        select.size = Math.min(8, visibleOptions.length);
-        select.style.display = 'block';
-    }
-
-    // Hide country dropdown
-    hideCountryDropdown() {
-        const select = document.getElementById('customerCountryCode');
-        const search = document.getElementById('customerCountryCodeSearch');
-        
-        select.classList.remove('filtered');
-        select.size = 1;
-        select.style.display = 'none';
-        
-        // Reset search if no valid selection
-        const selectedOption = select.options[select.selectedIndex];
-        if (selectedOption) {
-            search.value = selectedOption.textContent;
-        }
-    }
-
-    // Select country code
-    selectCountryCode(countryCode) {
-        const search = document.getElementById('customerCountryCodeSearch');
-        const select = document.getElementById('customerCountryCode');
-        const selectedOption = select.options[select.selectedIndex];
-        
-        if (selectedOption) {
-            search.value = selectedOption.textContent;
-        }
-        
-        this.hideCountryDropdown();
-        
-        // Validate phone number with new country code
-        const phoneInput = document.getElementById('customerPhone');
-        if (phoneInput.value) {
-            this.validatePhoneNumber(phoneInput.value);
-        }
-    }
-
-    // Phone validation
-    validatePhoneNumber(phoneNumber) {
-        const countryCode = document.getElementById('customerCountryCode').value;
-        const phoneError = document.getElementById('phoneError');
-        const phoneGroup = document.getElementById('customerPhone').closest('.form-group');
-        
-        // Remove existing validation classes
-        phoneGroup.classList.remove('error', 'success');
-        phoneError.classList.remove('show');
-        
-        if (!phoneNumber.trim()) {
-            return true; // Empty is valid (optional field)
-        }
-        
-        // Remove all non-digit characters for validation
-        const cleanNumber = phoneNumber.replace(/\D/g, '');
-        
-        // Basic validation rules by country code
-        const validationRules = {
-            '+1': { min: 10, max: 10, pattern: /^\d{10}$/ }, // US/Canada
-            '+44': { min: 10, max: 11, pattern: /^\d{10,11}$/ }, // UK
-            '+33': { min: 9, max: 10, pattern: /^\d{9,10}$/ }, // France
-            '+49': { min: 10, max: 12, pattern: /^\d{10,12}$/ }, // Germany
-            '+39': { min: 9, max: 11, pattern: /^\d{9,11}$/ }, // Italy
-            '+34': { min: 9, max: 9, pattern: /^\d{9}$/ }, // Spain
-            '+31': { min: 9, max: 9, pattern: /^\d{9}$/ }, // Netherlands
-            '+32': { min: 8, max: 9, pattern: /^\d{8,9}$/ }, // Belgium
-            '+41': { min: 9, max: 9, pattern: /^\d{9}$/ }, // Switzerland
-            '+43': { min: 10, max: 13, pattern: /^\d{10,13}$/ }, // Austria
-            '+45': { min: 8, max: 8, pattern: /^\d{8}$/ }, // Denmark
-            '+46': { min: 9, max: 10, pattern: /^\d{9,10}$/ }, // Sweden
-            '+47': { min: 8, max: 8, pattern: /^\d{8}$/ }, // Norway
-            '+358': { min: 9, max: 10, pattern: /^\d{9,10}$/ }, // Finland
-            '+91': { min: 10, max: 10, pattern: /^\d{10}$/ }, // India
-            '+86': { min: 11, max: 11, pattern: /^\d{11}$/ }, // China
-            '+81': { min: 10, max: 11, pattern: /^\d{10,11}$/ }, // Japan
-            '+82': { min: 10, max: 11, pattern: /^\d{10,11}$/ }, // South Korea
-            '+61': { min: 9, max: 9, pattern: /^\d{9}$/ }, // Australia
-            '+64': { min: 8, max: 9, pattern: /^\d{8,9}$/ }, // New Zealand
-        };
-        
-        const rule = validationRules[countryCode] || { min: 7, max: 15, pattern: /^\d{7,15}$/ };
-        
-        let isValid = true;
-        let errorMessage = '';
-        
-        if (cleanNumber.length < rule.min) {
-            isValid = false;
-            errorMessage = `Phone number too short. Minimum ${rule.min} digits required.`;
-        } else if (cleanNumber.length > rule.max) {
-            isValid = false;
-            errorMessage = `Phone number too long. Maximum ${rule.max} digits allowed.`;
-        } else if (!rule.pattern.test(cleanNumber)) {
-            isValid = false;
-            errorMessage = 'Invalid phone number format.';
-        }
-        
-        if (isValid) {
-            phoneGroup.classList.add('success');
-        } else {
-            phoneGroup.classList.add('error');
-            phoneError.textContent = errorMessage;
-            phoneError.classList.add('show');
-        }
-        
-        return isValid;
-    }
-
-    formatPhoneNumber(phoneNumber, countryCode) {
-        const cleanNumber = phoneNumber.replace(/\D/g, '');
-        
-        // Format based on country code
-        switch(countryCode) {
-            case '+1': // US/Canada format: (123) 456-7890
-                if (cleanNumber.length === 10) {
-                    return `(${cleanNumber.slice(0,3)}) ${cleanNumber.slice(3,6)}-${cleanNumber.slice(6)}`;
-                }
-                break;
-            case '+44': // UK format: 020 1234 5678
-                if (cleanNumber.length === 10) {
-                    return `${cleanNumber.slice(0,3)} ${cleanNumber.slice(3,7)} ${cleanNumber.slice(7)}`;
-                } else if (cleanNumber.length === 11) {
-                    return `${cleanNumber.slice(0,4)} ${cleanNumber.slice(4,7)} ${cleanNumber.slice(7)}`;
-                }
-                break;
-            case '+33': // France format: 01 23 45 67 89
-                if (cleanNumber.length === 9) {
-                    return `${cleanNumber.slice(0,1)} ${cleanNumber.slice(1,3)} ${cleanNumber.slice(3,5)} ${cleanNumber.slice(5,7)} ${cleanNumber.slice(7)}`;
-                } else if (cleanNumber.length === 10) {
-                    return `${cleanNumber.slice(0,2)} ${cleanNumber.slice(2,4)} ${cleanNumber.slice(4,6)} ${cleanNumber.slice(6,8)} ${cleanNumber.slice(8)}`;
-                }
-                break;
-            case '+49': // Germany format: 030 12345678
-                if (cleanNumber.length >= 10) {
-                    return `${cleanNumber.slice(0,3)} ${cleanNumber.slice(3)}`;
-                }
-                break;
-            default:
-                // Default formatting: add spaces every 3-4 digits
-                if (cleanNumber.length > 6) {
-                    return cleanNumber.replace(/(\d{3})(\d{3})(\d+)/, '$1 $2 $3');
-                } else if (cleanNumber.length > 3) {
-                    return cleanNumber.replace(/(\d{3})(\d+)/, '$1 $2');
-                }
-                return cleanNumber;
-        }
-        
-        return phoneNumber;
-    }
-
-    // Customer Management
-    async loadCustomersTable() {
-        try {
-            const response = await this.apiCall('/api/customers');
-            if (response.success) {
-                this.renderCustomersTable(response.data);
-            }
-        } catch (error) {
-            console.error('Failed to load customers table:', error);
-        }
-    }
-
-    renderCustomersTable(customers) {
-        const tbody = document.getElementById('customersTable');
-        tbody.innerHTML = '';
-
-        customers.forEach(customer => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${customer.name}</td>
-                <td>${customer.email || 'N/A'}</td>
-                <td>${customer.phone || 'N/A'}</td>
-                <td>
-                    <button class="btn btn-small btn-outline" onclick="app.editCustomer(${customer.id})">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-small btn-danger" onclick="app.deleteCustomer(${customer.id})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    showCustomerModal(customer = null) {
-        const modal = document.getElementById('customerModal');
-        const form = document.getElementById('customerForm');
-        const title = document.getElementById('customerModalTitle');
-
-        if (customer) {
-            title.textContent = 'Edit Customer';
-            document.getElementById('customerName').value = customer.name;
-            document.getElementById('customerEmail').value = customer.email || '';
-            
-            // Parse phone number if it exists
-            if (customer.phone) {
-                const phoneMatch = customer.phone.match(/^(\+\d+)\s*(.+)$/);
-                if (phoneMatch) {
-                    document.getElementById('customerCountryCode').value = phoneMatch[1];
-                    document.getElementById('customerCountryCodeSearch').value = this.getCountryName(phoneMatch[1]);
-                    document.getElementById('customerPhone').value = phoneMatch[2].replace(/\D/g, '');
-                } else {
-                    document.getElementById('customerCountryCode').value = '+95';
-                    document.getElementById('customerCountryCodeSearch').value = 'Myanmar +95';
-                    document.getElementById('customerPhone').value = customer.phone.replace(/\D/g, '');
-                }
-            } else {
-                document.getElementById('customerCountryCode').value = '+95';
-                document.getElementById('customerCountryCodeSearch').value = 'Myanmar +95';
-                document.getElementById('customerPhone').value = '';
-            }
-            
-            document.getElementById('customerAddress').value = customer.address || '';
-            form.dataset.customerId = customer.id;
-        } else {
-            title.textContent = 'Add Customer';
-            form.reset();
-            document.getElementById('customerCountryCode').value = '+95';
-            document.getElementById('customerCountryCodeSearch').value = 'Myanmar +95';
-            delete form.dataset.customerId;
-        }
-
-        // Clear validation states
-        document.querySelectorAll('.form-group').forEach(group => {
-            group.classList.remove('error', 'success');
-        });
-        document.querySelectorAll('.error-message').forEach(error => {
-            error.classList.remove('show');
-        });
-
-        modal.classList.add('active');
-    }
-
-    async handleCustomerSubmit() {
-        const form = document.getElementById('customerForm');
-        
-        // Validate phone number before submission
-        const phoneInput = document.getElementById('customerPhone');
-        const countryCode = document.getElementById('customerCountryCode').value;
-        
-        if (phoneInput.value && !this.validatePhoneNumber(phoneInput.value)) {
-            this.showError('Please enter a valid phone number');
-            return;
-        }
-        
-        // Prepare customer data
+const editCustomer = (id) => {
+    const customer = customers.find(c => c.id === id);
+    if (!customer) return;
+    
+    document.getElementById('customerModalTitle').textContent = 'Edit Customer';
+    document.getElementById('customerName').value = customer.name;
+    document.getElementById('customerEmail').value = customer.email || '';
+    document.getElementById('customerPhone').value = customer.phone || '';
+    document.getElementById('customerAddress').value = customer.address || '';
+    
+    document.getElementById('customerForm').onsubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
         const customerData = {
-            name: document.getElementById('customerName').value,
-            email: document.getElementById('customerEmail').value,
-            address: document.getElementById('customerAddress').value
+            name: formData.get('name'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            address: formData.get('address')
+        };
+        saveCustomer(customerData, true, id);
+    };
+    
+    openModal('customerModal');
+};
+
+const deleteCustomer = async (id) => {
+    if (!confirm('Are you sure you want to delete this customer?')) return;
+    
+    try {
+        await apiCall(`/customers/${id}`, { method: 'DELETE' });
+        showAlert('Customer deleted successfully!', 'success');
+        loadCustomers();
+    } catch (error) {
+        showAlert('Failed to delete customer: ' + error.message, 'error');
+    }
+};
+
+// User management
+const loadUsers = async () => {
+    try {
+        const response = await apiCall('/users');
+        users = response.data;
+        renderUsers();
+    } catch (error) {
+        console.error('Failed to load users:', error);
+        showAlert('Failed to load users: ' + error.message, 'error');
+    }
+};
+
+const renderUsers = () => {
+    const tbody = document.getElementById('usersTable');
+    tbody.innerHTML = '';
+    
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${user.name}</td>
+            <td>${user.username}</td>
+            <td>${user.email}</td>
+            <td><span class="role-badge role-${user.role}">${user.role}</span></td>
+            <td><span class="status-badge status-${user.is_active ? 'completed' : 'cancelled'}">${user.is_active ? 'Active' : 'Inactive'}</span></td>
+            <td>
+                <button class="btn btn-small btn-warning" onclick="editUser(${user.id})">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-small btn-danger" onclick="deleteUser(${user.id})">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+};
+
+const saveUser = async (userData, isEdit = false, userId = null) => {
+    try {
+        const endpoint = isEdit ? `/users/${userId}` : '/users';
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await apiCall(endpoint, {
+            method,
+            body: JSON.stringify(userData)
+        });
+        
+        showAlert(`User ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
+        closeModal('userModal');
+        loadUsers();
+    } catch (error) {
+        showAlert('Failed to save user: ' + error.message, 'error');
+    }
+};
+
+const editUser = (id) => {
+    const user = users.find(u => u.id === id);
+    if (!user) return;
+    
+    document.getElementById('userModalTitle').textContent = 'Edit User';
+    document.getElementById('userName').value = user.name;
+    document.getElementById('userUsername').value = user.username;
+    document.getElementById('userEmail').value = user.email;
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userRole').value = user.role;
+    document.getElementById('userActive').value = user.is_active ? '1' : '0';
+    
+    document.getElementById('userForm').onsubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const userData = {
+            name: formData.get('name'),
+            username: formData.get('username'),
+            email: formData.get('email'),
+            role: formData.get('role'),
+            is_active: formData.get('is_active') === '1' // Convert to boolean
         };
         
-        // Combine country code and phone number
-        if (phoneInput.value.trim()) {
-            const cleanPhone = phoneInput.value.replace(/\D/g, '');
-            customerData.phone = `${countryCode} ${this.formatPhoneNumber(cleanPhone, countryCode)}`;
-        } else {
-            customerData.phone = '';
+        // Only include password if it's provided
+        const password = formData.get('password');
+        if (password && password.trim() !== '') {
+            userData.password = password;
         }
+        
+        saveUser(userData, true, id);
+    };
+    
+    openModal('userModal');
+};
 
-        try {
-            let response;
-            if (form.dataset.customerId) {
-                response = await this.apiCall(`/api/customers/${form.dataset.customerId}`, 'PUT', customerData);
-            } else {
-                response = await this.apiCall('/api/customers', 'POST', customerData);
-            }
-
-            if (response.success) {
-                this.showSuccess('Customer saved successfully!');
-                this.closeModals();
-                this.loadCustomersTable();
-                this.loadCustomers();
-            } else {
-                this.showError('Failed to save customer: ' + response.message);
-            }
-        } catch (error) {
-            this.showError('Failed to save customer: ' + error.message);
-        }
+const deleteUser = async (id) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+    
+    try {
+        await apiCall(`/users/${id}`, { method: 'DELETE' });
+        showAlert('User deleted successfully!', 'success');
+        loadUsers();
+    } catch (error) {
+        showAlert('Failed to delete user: ' + error.message, 'error');
     }
+};
 
-    async editCustomer(id) {
-        try {
-            const response = await this.apiCall(`/api/customers/${id}`);
-            if (response.success) {
-                this.showCustomerModal(response.data);
-            }
-        } catch (error) {
-            this.showError('Failed to load customer: ' + error.message);
-        }
+// Sales management
+const loadSales = async () => {
+    try {
+        const response = await apiCall('/sales');
+        renderSales(response.data);
+    } catch (error) {
+        console.error('Failed to load sales:', error);
+        showAlert('Failed to load sales: ' + error.message, 'error');
     }
+};
 
-    async deleteCustomer(id) {
-        if (confirm('Are you sure you want to delete this customer?')) {
-            try {
-                const response = await this.apiCall(`/api/customers/${id}`, 'DELETE');
-                if (response.success) {
-                    this.showSuccess('Customer deleted successfully!');
-                    this.loadCustomersTable();
-                    this.loadCustomers();
-                } else {
-                    this.showError('Failed to delete customer: ' + response.message);
-                }
-            } catch (error) {
-                this.showError('Failed to delete customer: ' + error.message);
-            }
-        }
-    }
+const renderSales = (sales) => {
+    const tbody = document.getElementById('salesTable');
+    tbody.innerHTML = '';
+    
+    sales.forEach(sale => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${formatDate(sale.created_at)}</td>
+            <td>${sale.customer_name || 'Walk-in'}</td>
+            <td>${formatCurrency(sale.final_amount)}</td>
+            <td><span class="status-badge">${sale.payment_method}</span></td>
+            <td><span class="status-badge status-${sale.status}">${sale.status}</span></td>
+            <td>
+                <button class="btn btn-small btn-primary" onclick="viewSale(${sale.id})">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+};
 
-    // User Management
-    async loadUsersTable() {
-        try {
-            const response = await this.apiCall('/api/users');
-            if (response.success) {
-                this.renderUsersTable(response.data);
-            }
-        } catch (error) {
-            console.error('Failed to load users table:', error);
-        }
-    }
-
-    renderUsersTable(users) {
-        const tbody = document.getElementById('usersTable');
-        tbody.innerHTML = '';
-
-        users.forEach(user => {
-            const row = document.createElement('tr');
-            const statusClass = user.is_active ? 'status-completed' : 'status-cancelled';
-            const statusText = user.is_active ? 'Active' : 'Disabled';
-            
-            row.innerHTML = `
-                <td>${user.name}</td>
-                <td>${user.username}</td>
-                <td>${user.email}</td>
-                <td><span class="role-badge role-${user.role}">${user.role}</span></td>
-                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                <td>
-                    <button class="btn btn-small btn-outline" onclick="app.editUser(${user.id})" title="Edit User">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-small btn-danger" onclick="app.deleteUser(${user.id})" title="Delete User">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
+const viewSale = async (id) => {
+    try {
+        const response = await apiCall(`/sales/${id}`);
+        const sale = response.data;
+        
+        let itemsHtml = '';
+        sale.items.forEach(item => {
+            itemsHtml += `
+                <tr>
+                    <td>${item.product_name}</td>
+                    <td>${item.quantity}</td>
+                    <td>${formatCurrency(item.unit_price)}</td>
+                    <td>${formatCurrency(item.total_price)}</td>
+                </tr>
             `;
-            tbody.appendChild(row);
         });
-    }
-
-    showUserModal(user = null) {
-        const modal = document.getElementById('userModal');
-        const form = document.getElementById('userForm');
-        const title = document.getElementById('userModalTitle');
-        const passwordField = document.getElementById('userPassword');
-
-        if (user) {
-            title.textContent = 'Edit User';
-            document.getElementById('userName').value = user.name;
-            document.getElementById('userUsername').value = user.username;
-            document.getElementById('userEmail').value = user.email;
-            document.getElementById('userRole').value = user.role;
-            document.getElementById('userActive').checked = user.is_active;
-            passwordField.removeAttribute('required');
-            passwordField.placeholder = 'Leave blank to keep current password';
-            form.dataset.userId = user.id;
-        } else {
-            title.textContent = 'Add User';
-            form.reset();
-            document.getElementById('userActive').checked = true;
-            passwordField.setAttribute('required', 'required');
-            passwordField.placeholder = '';
-            delete form.dataset.userId;
-        }
-
-        modal.classList.add('active');
-    }
-
-    async handleUserSubmit() {
-        const form = document.getElementById('userForm');
-        const formData = new FormData(form);
-        const userData = Object.fromEntries(formData);
         
-        console.log('Submitting user data:', userData);
-        console.log('Current token:', this.token);
-        console.log('Current user:', this.user);
-        
-        // Convert checkbox value
-        userData.is_active = document.getElementById('userActive').checked;
-        
-        // Remove empty password for updates
-        if (form.dataset.userId && !userData.password.trim()) {
-            delete userData.password;
-        }
-
-        try {
-            let response;
-            if (form.dataset.userId) {
-                response = await this.apiCall(`/api/users/${form.dataset.userId}`, 'PUT', userData);
-            } else {
-                response = await this.apiCall('/api/users', 'POST', userData);
-            }
-
-            console.log('User submit response:', response);
-
-            if (response.success) {
-                this.showSuccess('User saved successfully!');
-                this.closeModals();
-                this.loadUsersTable();
-                this.loadUsers();
-            } else {
-                this.showError('Failed to save user: ' + response.message);
-            }
-        } catch (error) {
-            console.error('User submit error:', error);
-            this.showError('Failed to save user: ' + error.message);
-        }
-    }
-
-    async editUser(id) {
-        try {
-            const response = await this.apiCall(`/api/users/${id}`);
-            if (response.success) {
-                this.showUserModal(response.data);
-            }
-        } catch (error) {
-            this.showError('Failed to load user: ' + error.message);
-        }
-    }
-
-    async deleteUser(id) {
-        if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-            try {
-                const response = await this.apiCall(`/api/users/${id}`, 'DELETE');
-                if (response.success) {
-                    this.showSuccess('User deleted successfully!');
-                    this.loadUsersTable();
-                    this.loadUsers();
-                } else {
-                    this.showError('Failed to delete user: ' + response.message);
-                }
-            } catch (error) {
-                this.showError('Failed to delete user: ' + error.message);
-            }
-        }
-    }
-
-    // Sales Management
-    async loadSalesTable() {
-        try {
-            const response = await this.apiCall('/api/sales');
-            if (response.success) {
-                this.renderSalesTable(response.data);
-            }
-        } catch (error) {
-            console.error('Failed to load sales table:', error);
-        }
-    }
-
-    renderSalesTable(sales) {
-        const tbody = document.getElementById('salesTable');
-        tbody.innerHTML = '';
-
-        sales.forEach(sale => {
-            const row = document.createElement('tr');
-            const date = new Date(sale.created_at).toLocaleDateString();
-            row.innerHTML = `
-                <td>${date}</td>
-                <td>${sale.customer_name || 'Walk-in'}</td>
-                <td>${parseFloat(sale.final_amount).toFixed(0)} MMK</td>
-                <td>${sale.payment_method}</td>
-                <td><span class="status-badge status-${sale.status}">${sale.status}</span></td>
-                <td>
-                    <button class="btn btn-small btn-outline" onclick="app.viewSale(${sale.id})">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    async viewSale(id) {
-        try {
-            const response = await this.apiCall(`/api/sales/${id}`);
-            if (response.success) {
-                // For now, just show an alert with sale details
-                // In a real app, you'd show a detailed modal
-                alert(`Sale #${id}\nTotal: ${parseFloat(response.data.final_amount).toFixed(0)} MMK\nItems: ${response.data.items.length}`);
-            }
-        } catch (error) {
-            this.showError('Failed to load sale details: ' + error.message);
-        }
-    }
-
-    // Reports
-    async loadReports() {
-        try {
-            const [summaryResponse, topProductsResponse] = await Promise.all([
-                this.apiCall('/api/reports/sales-summary'),
-                this.apiCall('/api/reports/top-products?limit=5')
-            ]);
-
-            if (summaryResponse.success) {
-                this.renderSalesSummary(summaryResponse.data);
-            }
-
-            if (topProductsResponse.success) {
-                this.renderTopProducts(topProductsResponse.data);
-            }
-        } catch (error) {
-            console.error('Failed to load reports:', error);
-        }
-    }
-
-    renderSalesSummary(summary) {
-        const container = document.getElementById('salesSummary');
-        container.innerHTML = `
-            <div class="summary-stats">
-                <div class="stat">
-                    <h4>Total Sales</h4>
-                    <p>${summary.total_sales || 0}</p>
-                </div>
-                <div class="stat">
-                    <h4>Total Revenue</h4>
-                    <p>${parseFloat(summary.total_revenue || 0).toFixed(0)} MMK</p>
-                </div>
-                <div class="stat">
-                    <h4>Average Sale</h4>
-                    <p>${parseFloat(summary.average_sale || 0).toFixed(0)} MMK</p>
+        const saleDetails = `
+            <div class="sale-details">
+                <h3>Sale #${sale.id}</h3>
+                <p><strong>Date:</strong> ${formatDate(sale.created_at)}</p>
+                <p><strong>Customer:</strong> ${sale.customer_name || 'Walk-in'}</p>
+                <p><strong>Cashier:</strong> ${sale.cashier_name}</p>
+                <p><strong>Payment Method:</strong> ${sale.payment_method}</p>
+                <p><strong>Status:</strong> ${sale.status}</p>
+                
+                <h4>Items:</h4>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+                
+                <div class="sale-summary">
+                    <p><strong>Subtotal:</strong> ${formatCurrency(sale.total_amount)}</p>
+                    <p><strong>Discount:</strong> ${formatCurrency(sale.discount_amount)}</p>
+                    <p><strong>Tax:</strong> ${formatCurrency(sale.tax_amount)}</p>
+                    <p><strong>Total:</strong> ${formatCurrency(sale.final_amount)}</p>
                 </div>
             </div>
         `;
+        
+        // Create a simple modal for sale details
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Sale Details</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                <div style="padding: 1.5rem;">
+                    ${saleDetails}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+    } catch (error) {
+        showAlert('Failed to load sale details: ' + error.message, 'error');
     }
+};
 
-    renderTopProducts(products) {
-        const container = document.getElementById('topProducts');
-        container.innerHTML = '<ul class="top-products-list">' +
-            products.map(product => `
-                <li>
-                    <strong>${product.name}</strong><br>
-                    Sold: ${product.total_quantity} units<br>
-                    Revenue: ${parseFloat(product.total_revenue).toFixed(0)} MMK
-                </li>
-            `).join('') +
-        '</ul>';
+// Reports
+const loadReports = async () => {
+    try {
+        const [salesSummary, topProducts] = await Promise.all([
+            apiCall('/reports/sales-summary'),
+            apiCall('/reports/top-products?limit=5')
+        ]);
+        
+        renderSalesSummary(salesSummary.data);
+        renderTopProducts(topProducts.data);
+    } catch (error) {
+        console.error('Failed to load reports:', error);
+        showAlert('Failed to load reports: ' + error.message, 'error');
     }
+};
 
-    // Modal Management
-    closeModals() {
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.classList.remove('active');
+const renderSalesSummary = (summary) => {
+    const container = document.getElementById('salesSummary');
+    container.innerHTML = `
+        <div class="summary-stats">
+            <div class="stat-item">
+                <h4>Total Sales</h4>
+                <p>${summary.total_sales || 0}</p>
+            </div>
+            <div class="stat-item">
+                <h4>Total Revenue</h4>
+                <p>${formatCurrency(summary.total_revenue || 0)}</p>
+            </div>
+            <div class="stat-item">
+                <h4>Average Sale</h4>
+                <p>${formatCurrency(summary.average_sale || 0)}</p>
+            </div>
+        </div>
+    `;
+};
+
+const renderTopProducts = (products) => {
+    const container = document.getElementById('topProducts');
+    let html = '<div class="top-products-list">';
+    
+    products.forEach((product, index) => {
+        html += `
+            <div class="product-item">
+                <span class="rank">#${index + 1}</span>
+                <span class="name">${product.name}</span>
+                <span class="quantity">${product.total_quantity} sold</span>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+};
+
+// Cart management
+const addToCart = (product) => {
+    if (product.stock_quantity <= 0) {
+        showAlert('Product is out of stock!', 'error');
+        return;
+    }
+    
+    const existingItem = cart.find(item => item.product_id === product.id);
+    
+    if (existingItem) {
+        if (existingItem.quantity >= product.stock_quantity) {
+            showAlert('Cannot add more items than available stock!', 'error');
+            return;
+        }
+        existingItem.quantity++;
+    } else {
+        cart.push({
+            product_id: product.id,
+            name: product.name,
+            unit_price: product.price,
+            quantity: 1
         });
     }
+    
+    renderCart();
+};
 
-    // Utility Methods
-    showSuccess(message) {
-        // Simple alert for now - in a real app, use a toast notification
-        alert('Success: ' + message);
+const removeFromCart = (productId) => {
+    cart = cart.filter(item => item.product_id !== productId);
+    renderCart();
+};
+
+const updateCartQuantity = (productId, change) => {
+    const item = cart.find(item => item.product_id === productId);
+    if (!item) return;
+    
+    const product = products.find(p => p.id === productId);
+    const newQuantity = item.quantity + change;
+    
+    if (newQuantity <= 0) {
+        removeFromCart(productId);
+        return;
     }
-
-    showError(message) {
-        // Simple alert for now - in a real app, use a toast notification
-        alert('Error: ' + message);
+    
+    if (newQuantity > product.stock_quantity) {
+        showAlert('Cannot add more items than available stock!', 'error');
+        return;
     }
-}
+    
+    item.quantity = newQuantity;
+    renderCart();
+};
 
-// Initialize the application
-const app = new MiniPOS();
+const renderCart = () => {
+    const container = document.getElementById('cartItems');
+    container.innerHTML = '';
+    
+    if (cart.length === 0) {
+        container.innerHTML = '<p class="text-center">No items in cart</p>';
+        updateCartSummary();
+        return;
+    }
+    
+    cart.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'cart-item';
+        itemDiv.innerHTML = `
+            <div class="item-info">
+                <h5>${item.name}</h5>
+                <div class="item-price">${formatCurrency(item.unit_price)} each</div>
+            </div>
+            <div class="item-controls">
+                <button class="qty-btn" onclick="updateCartQuantity(${item.product_id}, -1)">-</button>
+                <span>${item.quantity}</span>
+                <button class="qty-btn" onclick="updateCartQuantity(${item.product_id}, 1)">+</button>
+                <button class="qty-btn" onclick="removeFromCart(${item.product_id})" style="background: #dc3545; color: white; margin-left: 0.5rem;">×</button>
+            </div>
+        `;
+        container.appendChild(itemDiv);
+    });
+    
+    updateCartSummary();
+};
+
+const updateCartSummary = () => {
+    const subtotal = cart.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const tax = subtotal * 0.05; // 5% tax
+    const total = subtotal + tax;
+    
+    document.getElementById('subtotal').textContent = formatCurrency(subtotal);
+    document.getElementById('tax').textContent = formatCurrency(tax);
+    document.getElementById('total').textContent = formatCurrency(total);
+};
+
+const clearCart = () => {
+    cart = [];
+    renderCart();
+};
+
+const checkout = async () => {
+    if (cart.length === 0) {
+        showAlert('Cart is empty!', 'error');
+        return;
+    }
+    
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    const subtotal = cart.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+    const tax = subtotal * 0.05;
+    
+    const saleData = {
+        customer_id: null, // For now, all sales are walk-in
+        items: cart.map(item => ({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            unit_price: item.unit_price
+        })),
+        discount_amount: 0,
+        tax_amount: tax,
+        payment_method: paymentMethod
+    };
+    
+    try {
+        const response = await apiCall('/sales', {
+            method: 'POST',
+            body: JSON.stringify(saleData)
+        });
+        
+        showAlert('Sale completed successfully!', 'success');
+        clearCart();
+        loadProducts(); // Refresh products to update stock
+        
+        // Optionally show receipt
+        if (confirm('Sale completed! Would you like to view the receipt?')) {
+            viewSale(response.data.id);
+        }
+        
+    } catch (error) {
+        showAlert('Failed to complete sale: ' + error.message, 'error');
+    }
+};
+
+// Modal management
+const openModal = (modalId) => {
+    document.getElementById(modalId).classList.add('active');
+};
+
+const closeModal = (modalId) => {
+    document.getElementById(modalId).classList.remove('active');
+    
+    // Reset forms
+    const form = document.querySelector(`#${modalId} form`);
+    if (form) {
+        form.reset();
+    }
+};
+
+// Phone number validation and formatting
+const setupPhoneValidation = () => {
+    const phoneInput = document.getElementById('customerPhone');
+    const countryCodeSelect = document.getElementById('customerCountryCode');
+    const countryCodeSearch = document.getElementById('customerCountryCodeSearch');
+    const phoneError = document.getElementById('phoneError');
+    
+    if (!phoneInput || !countryCodeSelect || !countryCodeSearch || !phoneError) return;
+    
+    // Country code search functionality
+    countryCodeSearch.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const options = countryCodeSelect.querySelectorAll('option');
+        
+        options.forEach(option => {
+            const text = option.textContent.toLowerCase();
+            option.style.display = text.includes(searchTerm) ? 'block' : 'none';
+        });
+    });
+    
+    // Phone number validation
+    const validatePhone = () => {
+        const countryCode = countryCodeSelect.value;
+        const phoneNumber = phoneInput.value.trim();
+        
+        if (!phoneNumber) {
+            phoneError.textContent = '';
+            phoneError.classList.remove('show');
+            phoneInput.parentElement.parentElement.classList.remove('error', 'success');
+            return true; // Empty is valid (optional field)
+        }
+        
+        // Remove any existing formatting
+        const cleanNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+        
+        // Basic validation: should be 7-15 digits
+        if (!/^\d{7,15}$/.test(cleanNumber)) {
+            phoneError.textContent = 'Phone number should be 7-15 digits';
+            phoneError.classList.add('show');
+            phoneInput.parentElement.parentElement.classList.add('error');
+            phoneInput.parentElement.parentElement.classList.remove('success');
+            return false;
+        }
+        
+        // Format the phone number
+        const fullNumber = countryCode + cleanNumber;
+        
+        phoneError.textContent = '';
+        phoneError.classList.remove('show');
+        phoneInput.parentElement.parentElement.classList.remove('error');
+        phoneInput.parentElement.parentElement.classList.add('success');
+        
+        // Update the input value with the full international format
+        phoneInput.value = fullNumber;
+        
+        return true;
+    };
+    
+    phoneInput.addEventListener('blur', validatePhone);
+    countryCodeSelect.addEventListener('change', validatePhone);
+};
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Login form
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const username = formData.get('username');
+        const password = formData.get('password');
+        
+        try {
+            await login(username, password);
+        } catch (error) {
+            showError(error.message);
+        }
+    });
+    
+    // Logout button
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    
+    // Navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = link.getAttribute('data-section');
+            showSection(section);
+        });
+    });
+    
+    // Product search
+    document.getElementById('productSearch').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredProducts = products.filter(product => 
+            product.name.toLowerCase().includes(searchTerm) ||
+            (product.barcode && product.barcode.toLowerCase().includes(searchTerm))
+        );
+        
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = '';
+        
+        filteredProducts.filter(p => p.is_active).forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.onclick = () => addToCart(product);
+            card.innerHTML = `
+                <h4>${product.name}</h4>
+                <div class="price">${formatCurrency(product.price)}</div>
+                <div class="stock">Stock: ${product.stock_quantity}</div>
+            `;
+            grid.appendChild(card);
+        });
+    });
+    
+    // Cart actions
+    document.getElementById('clearCart').addEventListener('click', clearCart);
+    document.getElementById('checkoutBtn').addEventListener('click', checkout);
+    
+    // Modal actions
+    document.querySelectorAll('.modal-close, .modal-cancel').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const modal = e.target.closest('.modal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        });
+    });
+    
+    // Add buttons
+    document.getElementById('addProductBtn').addEventListener('click', () => {
+        document.getElementById('productModalTitle').textContent = 'Add Product';
+        document.getElementById('productForm').onsubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const productData = {
+                name: formData.get('name'),
+                price: parseFloat(formData.get('price')),
+                stock_quantity: parseInt(formData.get('stock_quantity')),
+                category_id: parseInt(formData.get('category_id'))
+            };
+            saveProduct(productData);
+        };
+        openModal('productModal');
+    });
+    
+    document.getElementById('addCustomerBtn').addEventListener('click', () => {
+        document.getElementById('customerModalTitle').textContent = 'Add Customer';
+        document.getElementById('customerForm').onsubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const customerData = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                address: formData.get('address')
+            };
+            saveCustomer(customerData);
+        };
+        setupPhoneValidation();
+        openModal('customerModal');
+    });
+    
+    document.getElementById('addUserBtn').addEventListener('click', () => {
+        document.getElementById('userModalTitle').textContent = 'Add User';
+        document.getElementById('userForm').onsubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const userData = {
+                name: formData.get('name'),
+                username: formData.get('username'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                role: formData.get('role'),
+                is_active: formData.get('is_active') === '1' // Convert to boolean
+            };
+            saveUser(userData);
+        };
+        openModal('userModal');
+    });
+    
+    // Close modals when clicking outside
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+    });
+    
+    // Check authentication on page load
+    checkAuth();
+});
