@@ -106,6 +106,16 @@ body {
     color: #6b7280 !important;
     font-size: 0.95rem !important;
     margin-bottom: 0 !important;
+    padding: 0.75rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.remember-label:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
 }
 
 .remember-label input[type="checkbox"] {
@@ -113,29 +123,31 @@ body {
 }
 
 .remember-checkmark {
-    width: 20px;
-    height: 20px;
-    background-color: #f9fafb;
-    border: 2px solid #d1d5db;
-    border-radius: 6px;
+    width: 18px;
+    height: 18px;
+    background-color: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
     margin-right: 0.75rem;
     position: relative;
     transition: all 0.3s ease;
     flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .remember-label input[type="checkbox"]:checked + .remember-checkmark {
-    background-color: #6366f1;
-    border-color: #6366f1;
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    transform: scale(1.05);
 }
 
 .remember-label input[type="checkbox"]:checked + .remember-checkmark::after {
     content: '';
     position: absolute;
-    left: 6px;
-    top: 2px;
-    width: 6px;
-    height: 10px;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 9px;
     border: solid white;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
