@@ -612,27 +612,27 @@ class MiniPOS {
     // Get country name from country code
     getCountryName(countryCode) {
         const countryNames = {
-            '+1': '🇺🇸 US +1',
-            '+44': '🇬🇧 United Kingdom',
-            '+33': '🇫🇷 France',
-            '+49': '🇩🇪 Germany',
-            '+39': '🇮🇹 Italy',
-            '+34': '🇪🇸 Spain',
-            '+31': '🇳🇱 Netherlands',
-            '+32': '🇧🇪 Belgium',
-            '+41': '🇨🇭 Switzerland',
-            '+43': '🇦🇹 Austria',
-            '+45': '🇩🇰 Denmark',
-            '+46': '🇸🇪 Sweden',
-            '+47': '🇳🇴 Norway',
-            '+358': '🇫🇮 Finland',
-            '+91': '🇮🇳 India',
-            '+86': '🇨🇳 China',
-            '+81': '🇯🇵 Japan',
-            '+82': '🇰🇷 South Korea',
-            '+61': '🇦🇺 Australia',
-            '+64': '🇳🇿 New Zealand',
-            '+95': '🇲🇲 Myanmar'
+            '+1': 'United States +1',
+            '+44': 'United Kingdom +44',
+            '+33': 'France +33',
+            '+49': 'Germany +49',
+            '+39': 'Italy +39',
+            '+34': 'Spain +34',
+            '+31': 'Netherlands +31',
+            '+32': 'Belgium +32',
+            '+41': 'Switzerland +41',
+            '+43': 'Austria +43',
+            '+45': 'Denmark +45',
+            '+46': 'Sweden +46',
+            '+47': 'Norway +47',
+            '+358': 'Finland +358',
+            '+91': 'India +91',
+            '+86': 'China +86',
+            '+81': 'Japan +81',
+            '+82': 'South Korea +82',
+            '+61': 'Australia +61',
+            '+64': 'New Zealand +64',
+            '+95': 'Myanmar +95'
         };
         
         return countryNames[countryCode] || countryCode;
@@ -870,7 +870,7 @@ class MiniPOS {
                 }
             } else {
                 document.getElementById('customerCountryCode').value = '+1';
-                document.getElementById('customerCountryCodeSearch').value = '🇺🇸 US +1';
+                document.getElementById('customerCountryCodeSearch').value = 'United States +1';
                 document.getElementById('customerPhone').value = '';
             }
             
@@ -880,7 +880,7 @@ class MiniPOS {
             title.textContent = 'Add Customer';
             form.reset();
             document.getElementById('customerCountryCode').value = '+1';
-            document.getElementById('customerCountryCodeSearch').value = '🇺🇸 US +1';
+            document.getElementById('customerCountryCodeSearch').value = 'United States +1';
             delete form.dataset.customerId;
         }
 
