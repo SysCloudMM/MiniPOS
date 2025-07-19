@@ -172,11 +172,11 @@
                                 <h3 class="nav-section-title">System</h3>
                                 <ul class="nav-menu">
                                     <li class="nav-item">
-                                        <a href="#" data-section="settings" class="nav-link" id="settingsLink">
+                                        <a href="#" data-section="users" class="nav-link" id="usersLink">
                                             <div class="nav-icon">
-                                                <i class="fas fa-cog"></i>
+                                                <i class="fas fa-users-cog"></i>
                                             </div>
-                                            <span class="nav-text">Settings</span>
+                                            <span class="nav-text">Users</span>
                                             <div class="nav-indicator"></div>
                                         </a>
                                     </li>
@@ -481,42 +481,13 @@
                         </div>
                     </section>
 
-                    <!-- Settings Section -->
-                    <section id="settingsSection" class="content-section">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <h1 class="section-title">Settings</h1>
-                                <p class="section-subtitle">System configuration and preferences</p>
-                            </div>
-                        </div>
-                        <div class="settings-grid">
-                            <div class="settings-card" onclick="showSettingsSubsection('users')">
-                                <div class="settings-icon">
-                                    <i class="fas fa-users-cog"></i>
-                                </div>
-                                <div class="settings-content">
-                                    <h3>User Management</h3>
-                                    <p>Manage system users, roles and permissions</p>
-                                </div>
-                                <div class="settings-arrow">
-                                    <i class="fas fa-chevron-right"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
 
                     <!-- Users Section -->
                     <section id="usersSection" class="content-section">
                         <div class="section-header">
                             <div class="header-left">
-                                <button class="btn btn-ghost" onclick="showSection('settings')">
-                                    <i class="fas fa-arrow-left"></i>
-                                    <span>Back to Settings</span>
-                                </button>
-                                <div>
-                                    <h1 class="section-title">User Management</h1>
-                                    <p class="section-subtitle">Manage system users and permissions</p>
-                                </div>
+                                <h1 class="section-title">User Management</h1>
+                                <p class="section-subtitle">Manage system users and permissions</p>
                             </div>
                             <div class="header-actions">
                                 <button id="addUserBtn" class="btn btn-primary">
@@ -542,6 +513,19 @@
                                         <!-- Users will be loaded here -->
                                     </tbody>
                                 </table>
+                            </div>
+                            <div id="usersPagination" class="pagination-container">
+                                <div class="pagination-info">
+                                    <span id="usersPageInfo">Showing 0 - 0 of 0 users</span>
+                                </div>
+                                <div class="pagination-controls">
+                                    <button id="usersPrevBtn" class="pagination-btn">
+                                        <i class="fas fa-chevron-left"></i> Previous
+                                    </button>
+                                    <button id="usersNextBtn" class="pagination-btn">
+                                        Next <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </section>

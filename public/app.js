@@ -10,6 +10,7 @@ let categories = [];
 let currentProductsPage = 1;
 let currentCategoriesPage = 1;
 let currentPosPage = 1;
+let currentUsersPage = 1;
 const itemsPerPage = 12;
 
 // API Base URL
@@ -199,12 +200,12 @@ const showDashboard = () => {
     const userName = currentUser ? (currentUser.name || currentUser.username) : 'User';
     document.getElementById('userInfo').textContent = `Welcome, ${userName}`;
     
-    // Show/hide settings based on role
-    const settingsLink = document.getElementById('settingsLink');
+    // Show/hide users based on role
+    const usersLink = document.getElementById('usersLink');
     if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager')) {
-        settingsLink.style.display = 'block';
+        usersLink.style.display = 'block';
     } else {
-        settingsLink.style.display = 'none';
+        usersLink.style.display = 'none';
     }
     
     showSection('pos');
@@ -217,14 +218,7 @@ const showSection = (sectionName) => {
         link.classList.remove('active');
     });
     
-    // Handle special cases for sub-sections
-    let navLink;
-    if (sectionName === 'users') {
-        // For users section, activate the settings nav link since users is under settings
-        navLink = document.querySelector(`[data-section="settings"]`);
-    } else {
-        navLink = document.querySelector(`[data-section="${sectionName}"]`);
-    }
+    const navLink = document.querySelector(`[data-section="${sectionName}"]`);
     
     // Only add active class if the nav link exists
     if (navLink) {
@@ -248,9 +242,6 @@ const showSection = (sectionName) => {
         case 'customers':
             loadCustomers();
             break;
-        case 'settings':
-            // Settings section doesn't need to load data initially
-            break;
         case 'users':
             loadUsers();
             break;
@@ -259,15 +250,6 @@ const showSection = (sectionName) => {
             break;
         case 'reports':
             loadReports();
-            break;
-    }
-};
-
-// Settings subsection navigation
-const showSettingsSubsection = (subsection) => {
-    switch(subsection) {
-        case 'users':
-            showSection('users');
             break;
     }
 };
