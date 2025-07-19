@@ -1784,13 +1784,14 @@ textarea:focus {
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 1.5rem;
     border: 2px solid transparent;
 }
 
 @media (min-width: 768px) {
     .settings-card {
         padding: 2rem;
+        gap: 2rem;
     }
 }
 
@@ -1800,24 +1801,32 @@ textarea:focus {
     border-color: #667eea;
 }
 
+.settings-card:hover .settings-card-icon {
+    background: #667eea;
+    color: white;
+    transform: scale(1.05);
+}
+
 .settings-card-icon {
     flex-shrink: 0;
-    width: 50px;
-    height: 50px;
-    background: #f8f9fa;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #667eea;
-    font-size: 1.5rem;
+    color: white;
+    font-size: 1.75rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
 }
 
 @media (min-width: 768px) {
     .settings-card-icon {
-        width: 60px;
-        height: 60px;
-        font-size: 1.75rem;
+        width: 70px;
+        height: 70px;
+        font-size: 2rem;
     }
 }
 
@@ -1829,39 +1838,46 @@ textarea:focus {
 .settings-card-content h3 {
     margin: 0 0 0.5rem 0;
     color: #333;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
 }
 
 @media (min-width: 768px) {
     .settings-card-content h3 {
-        font-size: 1.25rem;
+        font-size: 1.4rem;
     }
 }
 
 .settings-card-content p {
     margin: 0;
     color: #666;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     line-height: 1.4;
 }
 
 @media (min-width: 768px) {
     .settings-card-content p {
-        font-size: 0.95rem;
+        font-size: 1rem;
+        line-height: 1.5;
     }
 }
 
 .settings-card-arrow {
     flex-shrink: 0;
     color: #999;
-    font-size: 1rem;
+    font-size: 1.2rem;
     transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .settings-card-arrow {
+        font-size: 1.4rem;
+    }
 }
 
 .settings-card:hover .settings-card-arrow {
     color: #667eea;
-    transform: translateX(3px);
+    transform: translateX(5px);
 }
 
 /* Sale Details Modal - Responsive */
