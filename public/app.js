@@ -8,6 +8,8 @@ class MiniPOS {
         this.customers = [];
         this.users = [];
         this.sales = [];
+        this.loginAttempts = 0;
+        this.lockoutEndTime = null;
         
         this.init();
     }
@@ -149,8 +151,48 @@ class MiniPOS {
         });
     }
 
+    // Check if login is currently locked out
+    isLoginLocked() {
+        if (this.lockoutEndTime && Date.now() < this.lockoutEndTime) {
+            return true;
+        }
+        if (this.lockoutEndTime && Date.now() >= this.lockoutEndTime) {
+            // Reset attempts after lockout period
+            this.loginAttempts = 0;
+            this.lockoutEndTime = null;
+        }
+        return false;
+    }
+
+    // Get remaining lockout time in seconds
+    getRemainingLockoutTime() {
+        if (this.lockoutEndTime && Date.now() < this.lockoutEndTime) {
+            return Math.ceil((this.lockoutEndTime - Date.now()) / 1000);
+        }
+        return 0;
+    }
+
+    // Update lockout timer display
+    updateLockoutTimer() {
+        const remainingTime = this.getRemainingLockoutTime();
+        if (remainingTime > 0) {
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            this.showLoginError(`Too many failed attempts. Please wait ${timeString} before trying again.`);
+            
+            setTimeout(() => this.updateLockoutTimer(), 1000);
+        }
+    }
+
     // Authentication
     async handleLogin() {
+        // Check if login is locked out
+        if (this.isLoginLocked()) {
+            this.updateLockoutTimer();
+            return;
+        }
+
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const errorContainer = document.getElementById('loginError');
@@ -177,18 +219,45 @@ class MiniPOS {
                 localStorage.setItem('minipos_token', this.token);
                 localStorage.setItem('minipos_user', JSON.stringify(this.user));
                 
+                // Reset login attempts on successful login
+                this.loginAttempts = 0;
+                this.lockoutEndTime = null;
+                
                 this.showDashboard();
                 this.loadInitialData();
             } else {
-                this.showLoginError('Username or Password is wrong');
+                this.loginAttempts++;
+                
+                if (this.loginAttempts >= 3) {
+                    // Lock out for 1 minute (60000 milliseconds)
+                    this.lockoutEndTime = Date.now() + 60000;
+                    this.updateLockoutTimer();
+                } else {
+                    const remainingAttempts = 3 - this.loginAttempts;
+                    this.showLoginError(`Wrong username or password. Please try again. (${remainingAttempts} attempts remaining)`);
+                }
             }
         } catch (error) {
             console.error('Login error:', error);
-            this.showLoginError('Username or Password is wrong');
+            this.loginAttempts++;
+            
+            if (this.loginAttempts >= 3) {
+                this.lockoutEndTime = Date.now() + 60000;
+                this.updateLockoutTimer();
+            } else {
+                const remainingAttempts = 3 - this.loginAttempts;
+                this.showLoginError(`Wrong username or password. Please try again. (${remainingAttempts} attempts remaining)`);
+            }
         }
     }
     
     showLoginError(message) {
+        // Remove any existing error
+        const existingError = document.querySelector('.login-error');
+        if (existingError) {
+            existingError.remove();
+        }
+
         let errorContainer = document.getElementById('loginError');
         if (!errorContainer) {
             // Create error container if it doesn't exist
@@ -202,6 +271,13 @@ class MiniPOS {
         
         errorContainer.textContent = message;
         errorContainer.style.display = 'block';
+        
+        // Auto-hide error after 5 seconds
+        setTimeout(() => {
+            if (errorContainer.parentNode) {
+                errorContainer.remove();
+            }
+        }, 5000);
     }
 
     handleLogout() {
