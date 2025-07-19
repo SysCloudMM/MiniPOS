@@ -200,14 +200,6 @@ const showDashboard = () => {
     const userName = currentUser ? (currentUser.name || currentUser.username) : 'User';
     document.getElementById('userInfo').textContent = `Welcome, ${userName}`;
     
-    // Show/hide users based on role
-    const usersLink = document.getElementById('usersLink');
-    if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager')) {
-        usersLink.style.display = 'block';
-    } else {
-        usersLink.style.display = 'none';
-    }
-    
     showSection('pos');
     loadProducts();
 };
@@ -241,9 +233,6 @@ const showSection = (sectionName) => {
             break;
         case 'customers':
             loadCustomers();
-            break;
-        case 'users':
-            loadUsers();
             break;
         case 'sales':
             loadSales();
@@ -382,22 +371,6 @@ const loadProducts = async () => {
         renderProductGrid();
         // Load categories for dropdown
         if (categories.length === 0) {
-   // Users pagination
-   document.getElementById('usersPrevBtn').addEventListener('click', () => {
-       if (currentUsersPage > 1) {
-           currentUsersPage--;
-           renderUsers();
-       }
-   });
-   
-   document.getElementById('usersNextBtn').addEventListener('click', () => {
-       const totalPages = Math.ceil(users.length / itemsPerPage);
-       if (currentUsersPage < totalPages) {
-           currentUsersPage++;
-           renderUsers();
-       }
-   });
-   
             await loadCategories();
         }
     } catch (error) {
@@ -652,113 +625,6 @@ const deleteCustomer = async (id) => {
         loadCustomers();
     } catch (error) {
         showAlert('Failed to delete customer: ' + error.message, 'error');
-    }
-};
-
-// User management
-const loadUsers = async () => {
-    try {
-        const response = await apiCall('/users');
-        users = response.data;
-        renderUsers();
-    } catch (error) {
-        console.error('Failed to load users:', error);
-        showAlert('Failed to load users: ' + error.message, 'error');
-    }
-};
-
-const renderUsers = () => {
-    const tbody = document.getElementById('usersTable');
-    tbody.innerHTML = '';
-    
-    users.forEach(user => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${user.name}</td>
-            <td>${user.username}</td>
-            <td>${user.email}</td>
-            <td><span class="role-badge role-${user.role}">${user.role}</span></td>
-            <td><span class="status-badge status-${user.is_active ? 'completed' : 'cancelled'}">${user.is_active ? 'Active' : 'Inactive'}</span></td>
-            <td>
-                <button class="btn btn-small btn-warning" onclick="editUser(${user.id})">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="btn btn-small btn-danger" onclick="deleteUser(${user.id})">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-};
-
-const saveUser = async (userData, isEdit = false, userId = null) => {
-    try {
-        const endpoint = isEdit ? `/users/${userId}` : '/users';
-        const method = isEdit ? 'PUT' : 'POST';
-        
-        const response = await apiCall(endpoint, {
-            method,
-            body: JSON.stringify(userData)
-        });
-        
-        showAlert(`User ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
-        closeModal('userModal');
-        loadUsers();
-    } catch (error) {
-        showAlert('Failed to save user: ' + error.message, 'error');
-    }
-};
-
-const editUser = (id) => {
-    const user = users.find(u => u.id === id);
-    if (!user) return;
-    
-    document.getElementById('userModalTitle').textContent = 'Edit User';
-    document.getElementById('userName').value = user.name;
-    document.getElementById('userUsername').value = user.username;
-    document.getElementById('userEmail').value = user.email;
-    document.getElementById('userPassword').value = '';
-    document.getElementById('userRole').value = user.role;
-    document.getElementById('userActive').value = user.is_active ? '1' : '0';
-    
-    // Make password field optional for editing
-    const passwordField = document.getElementById('userPassword');
-    passwordField.removeAttribute('required');
-    passwordField.placeholder = 'Leave blank to keep current password';
-    
-    document.getElementById('userForm').onsubmit = (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const userData = {
-            name: formData.get('name'),
-            username: formData.get('username'),
-            email: formData.get('email'),
-            role: formData.get('role'),
-            is_active: formData.get('is_active') === '1' // Convert to boolean
-        };
-        
-        // Only include password if it's provided
-        const password = formData.get('password');
-        if (password && password.trim() !== '') {
-            userData.password = password;
-        }
-        
-        saveUser(userData, true, id);
-    };
-    
-    openModal('userModal');
-};
-
-const deleteUser = async (id) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
-    
-    try {
-        await apiCall(`/users/${id}`, { method: 'DELETE' });
-        showAlert('User deleted successfully!', 'success');
-        loadUsers();
-    } catch (error) {
-        showAlert('Failed to delete user: ' + error.message, 'error');
     }
 };
 
@@ -1322,30 +1188,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         setupPhoneValidation();
         openModal('customerModal');
-    });
-    
-    document.getElementById('addUserBtn').addEventListener('click', () => {
-        document.getElementById('userModalTitle').textContent = 'Add User';
-        
-        // Make password field required for new users
-        const passwordField = document.getElementById('userPassword');
-        passwordField.setAttribute('required', 'required');
-        passwordField.placeholder = '';
-        
-        document.getElementById('userForm').onsubmit = (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const userData = {
-                name: formData.get('name'),
-                username: formData.get('username'),
-                email: formData.get('email'),
-                password: formData.get('password'),
-                role: formData.get('role'),
-                is_active: formData.get('is_active') === '1' // Convert to boolean
-            };
-            saveUser(userData);
-        };
-        openModal('userModal');
     });
     
     // Close modals when clicking outside

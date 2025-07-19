@@ -168,20 +168,6 @@
                                     </li>
                                 </ul>
                             </div>
-                            <div class="nav-section">
-                                <h3 class="nav-section-title">System</h3>
-                                <ul class="nav-menu">
-                                    <li class="nav-item">
-                                        <a href="#" data-section="users" class="nav-link" id="usersLink">
-                                            <div class="nav-icon">
-                                                <i class="fas fa-users-cog"></i>
-                                            </div>
-                                            <span class="nav-text">Users</span>
-                                            <div class="nav-indicator"></div>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
                         </nav>
                     </div>
                 </aside>
@@ -481,54 +467,6 @@
                         </div>
                     </section>
 
-
-                    <!-- Users Section -->
-                    <section id="usersSection" class="content-section">
-                        <div class="section-header">
-                            <div class="header-left">
-                                <h1 class="section-title">User Management</h1>
-                                <p class="section-subtitle">Manage system users and permissions</p>
-                            </div>
-                            <div class="header-actions">
-                                <button id="addUserBtn" class="btn btn-primary">
-                                    <i class="fas fa-plus"></i>
-                                    <span>Add User</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="section-card">
-                            <div class="table-container">
-                                <table class="data-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Username</th>
-                                            <th>Email</th>
-                                            <th>Role</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="usersTable">
-                                        <!-- Users will be loaded here -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div id="usersPagination" class="pagination-container">
-                                <div class="pagination-info">
-                                    <span id="usersPageInfo">Showing 0 - 0 of 0 users</span>
-                                </div>
-                                <div class="pagination-controls">
-                                    <button id="usersPrevBtn" class="pagination-btn">
-                                        <i class="fas fa-chevron-left"></i> Previous
-                                    </button>
-                                    <button id="usersNextBtn" class="pagination-btn">
-                                        Next <i class="fas fa-chevron-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
                 </main>
             </div>
         </div>
@@ -675,61 +613,6 @@
         </div>
     </div>
 
-    <div id="userModal" class="modal">
-        <div class="modal-backdrop"></div>
-        <div class="modal-container">
-            <div class="modal-header">
-                <h3 id="userModalTitle">Add User</h3>
-                <button class="modal-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="userForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="userName">Full Name</label>
-                            <input type="text" id="userName" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="userUsername">Username</label>
-                            <input type="text" id="userUsername" name="username" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="userEmail">Email</label>
-                        <input type="email" id="userEmail" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="userPassword">Password</label>
-                        <input type="password" id="userPassword" name="password" required>
-                        <small class="form-hint">Leave blank to keep current password (when editing)</small>
-                    </div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="userRole">Role</label>
-                            <select id="userRole" name="role" required>
-                                <option value="cashier">Cashier</option>
-                                <option value="manager">Manager</option>
-                                <option value="admin">Administrator</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="userActive">Status</label>
-                            <select id="userActive" name="is_active" required>
-                                <option value="1">Active</option>
-                                <option value="0">Inactive</option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-ghost modal-cancel">Cancel</button>
-                <button type="submit" form="userForm" class="btn btn-primary">Save User</button>
-            </div>
-        </div>
-    </div>
 
     <script src="./app.js"></script>
 </body>
