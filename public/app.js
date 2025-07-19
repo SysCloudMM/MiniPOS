@@ -626,13 +626,14 @@ class MiniPOS {
             '+46': 'Sweden +46',
             '+47': 'Norway +47',
             '+358': 'Finland +358',
+            '+66': 'Thailand +66',
+            '+95': 'Myanmar +95',
             '+91': 'India +91',
             '+86': 'China +86',
             '+81': 'Japan +81',
             '+82': 'South Korea +82',
             '+61': 'Australia +61',
             '+64': 'New Zealand +64',
-            '+95': 'Myanmar +95'
         };
         
         return countryNames[countryCode] || countryCode;
@@ -864,13 +865,13 @@ class MiniPOS {
                     document.getElementById('customerCountryCodeSearch').value = this.getCountryName(phoneMatch[1]);
                     document.getElementById('customerPhone').value = phoneMatch[2].replace(/\D/g, '');
                 } else {
-                    document.getElementById('customerCountryCode').value = '+1';
-                    document.getElementById('customerCountryCodeSearch').value = '🇺🇸 United States';
+                    document.getElementById('customerCountryCode').value = '+95';
+                    document.getElementById('customerCountryCodeSearch').value = 'Myanmar +95';
                     document.getElementById('customerPhone').value = customer.phone.replace(/\D/g, '');
                 }
             } else {
-                document.getElementById('customerCountryCode').value = '+1';
-                document.getElementById('customerCountryCodeSearch').value = 'United States +1';
+                document.getElementById('customerCountryCode').value = '+95';
+                document.getElementById('customerCountryCodeSearch').value = 'Myanmar +95';
                 document.getElementById('customerPhone').value = '';
             }
             
@@ -879,8 +880,8 @@ class MiniPOS {
         } else {
             title.textContent = 'Add Customer';
             form.reset();
-            document.getElementById('customerCountryCode').value = '+1';
-            document.getElementById('customerCountryCodeSearch').value = 'United States +1';
+            document.getElementById('customerCountryCode').value = '+95';
+            document.getElementById('customerCountryCodeSearch').value = 'Myanmar +95';
             delete form.dataset.customerId;
         }
 
