@@ -6,6 +6,12 @@ let customers = [];
 let users = [];
 let categories = [];
 
+// Pagination variables
+let currentProductsPage = 1;
+let currentCategoriesPage = 1;
+let currentPosPage = 1;
+const itemsPerPage = 12;
+
 // API Base URL
 const API_BASE = '/api';
 
@@ -283,7 +289,11 @@ const renderCategories = async () => {
     const tbody = document.getElementById('categoriesTable');
     tbody.innerHTML = '';
     
-    categories.forEach(category => {
+    const startIndex = (currentCategoriesPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedCategories = categories.slice(startIndex, endIndex);
+    
+    paginatedCategories.forEach(category => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${category.name}</td>
@@ -299,6 +309,21 @@ const renderCategories = async () => {
         `;
         tbody.appendChild(row);
     });
+    
+    updateCategoriesPagination();
+};
+
+const updateCategoriesPagination = () => {
+    const totalItems = categories.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentCategoriesPage - 1) * itemsPerPage + 1;
+    const endIndex = Math.min(currentCategoriesPage * itemsPerPage, totalItems);
+    
+    document.getElementById('categoriesPageInfo').textContent = 
+        `Showing ${startIndex} - ${endIndex} of ${totalItems} categories`;
+    
+    document.getElementById('categoriesPrevBtn').disabled = currentCategoriesPage === 1;
+    document.getElementById('categoriesNextBtn').disabled = currentCategoriesPage === totalPages || totalPages === 0;
 };
 
 const updateCategoryDropdown = () => {
@@ -389,7 +414,11 @@ const renderProducts = () => {
     
     tbody.innerHTML = '';
     
-    products.forEach(product => {
+    const startIndex = (currentProductsPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedProducts = products.slice(startIndex, endIndex);
+    
+    paginatedProducts.forEach(product => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${product.name}</td>
@@ -407,6 +436,21 @@ const renderProducts = () => {
         `;
         tbody.appendChild(row);
     });
+    
+    updateProductsPagination();
+};
+
+const updateProductsPagination = () => {
+    const totalItems = products.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentProductsPage - 1) * itemsPerPage + 1;
+    const endIndex = Math.min(currentProductsPage * itemsPerPage, totalItems);
+    
+    document.getElementById('productsPageInfo').textContent = 
+        `Showing ${startIndex} - ${endIndex} of ${totalItems} products`;
+    
+    document.getElementById('productsPrevBtn').disabled = currentProductsPage === 1;
+    document.getElementById('productsNextBtn').disabled = currentProductsPage === totalPages || totalPages === 0;
 };
 
 const renderProductGrid = () => {
@@ -416,13 +460,17 @@ const renderProductGrid = () => {
     grid.innerHTML = '';
     
     const activeProducts = products.filter(p => p.is_active !== false);
+    const startIndex = (currentPosPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedProducts = activeProducts.slice(startIndex, endIndex);
     
-    if (activeProducts.length === 0) {
+    if (paginatedProducts.length === 0) {
         grid.innerHTML = '<div class="no-products">No products available</div>';
+        updatePosPagination();
         return;
     }
     
-    activeProducts.forEach(product => {
+    paginatedProducts.forEach(product => {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.onclick = () => addToCart(product);
@@ -432,6 +480,22 @@ const renderProductGrid = () => {
         `;
         grid.appendChild(card);
     });
+    
+    updatePosPagination();
+};
+
+const updatePosPagination = () => {
+    const activeProducts = products.filter(p => p.is_active !== false);
+    const totalItems = activeProducts.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const startIndex = (currentPosPage - 1) * itemsPerPage + 1;
+    const endIndex = Math.min(currentPosPage * itemsPerPage, totalItems);
+    
+    document.getElementById('posPageInfo').textContent = 
+        `Showing ${startIndex} - ${endIndex} of ${totalItems} products`;
+    
+    document.getElementById('posPrevBtn').disabled = currentPosPage === 1;
+    document.getElementById('posNextBtn').disabled = currentPosPage === totalPages || totalPages === 0;
 };
 
 const saveProduct = async (productData, isEdit = false, productId = null) => {
@@ -1262,6 +1326,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 modal.classList.remove('active');
             }
         });
+    });
+    
+    // Pagination event listeners
+    document.getElementById('productsPrevBtn').addEventListener('click', () => {
+        if (currentProductsPage > 1) {
+            currentProductsPage--;
+            renderProducts();
+        }
+    });
+    
+    document.getElementById('productsNextBtn').addEventListener('click', () => {
+        const totalPages = Math.ceil(products.length / itemsPerPage);
+        if (currentProductsPage < totalPages) {
+            currentProductsPage++;
+            renderProducts();
+        }
+    });
+    
+    document.getElementById('categoriesPrevBtn').addEventListener('click', () => {
+        if (currentCategoriesPage > 1) {
+            currentCategoriesPage--;
+            renderCategories();
+        }
+    });
+    
+    document.getElementById('categoriesNextBtn').addEventListener('click', () => {
+        const totalPages = Math.ceil(categories.length / itemsPerPage);
+        if (currentCategoriesPage < totalPages) {
+            currentCategoriesPage++;
+            renderCategories();
+        }
+    });
+    
+    document.getElementById('posPrevBtn').addEventListener('click', () => {
+        if (currentPosPage > 1) {
+            currentPosPage--;
+            renderProductGrid();
+        }
+    });
+    
+    document.getElementById('posNextBtn').addEventListener('click', () => {
+        const activeProducts = products.filter(p => p.is_active !== false);
+        const totalPages = Math.ceil(activeProducts.length / itemsPerPage);
+        if (currentPosPage < totalPages) {
+            currentPosPage++;
+            renderProductGrid();
+        }
     });
     
 });
