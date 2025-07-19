@@ -467,6 +467,11 @@ const editUser = (id) => {
     document.getElementById('userRole').value = user.role;
     document.getElementById('userActive').value = user.is_active ? '1' : '0';
     
+    // Make password field optional for editing
+    const passwordField = document.getElementById('userPassword');
+    passwordField.removeAttribute('required');
+    passwordField.placeholder = 'Leave blank to keep current password';
+    
     document.getElementById('userForm').onsubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -980,6 +985,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('addUserBtn').addEventListener('click', () => {
         document.getElementById('userModalTitle').textContent = 'Add User';
+        
+        // Make password field required for new users
+        const passwordField = document.getElementById('userPassword');
+        passwordField.setAttribute('required', 'required');
+        passwordField.placeholder = '';
+        
         document.getElementById('userForm').onsubmit = (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
