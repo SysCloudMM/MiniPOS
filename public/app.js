@@ -199,7 +199,7 @@ class MiniPOS {
     showDashboard() {
         document.getElementById('loginScreen').classList.remove('active');
         document.getElementById('dashboardScreen').classList.add('active');
-        document.getElementById('userInfo').textContent = `Welcome, ${this.user.name || this.user.username}`;
+        document.getElementById('userInfo').textContent = `Welcome, ${this.user.name}`;
         
         // Hide user management link for cashiers
         const userManagementLink = document.getElementById('userManagementLink');
