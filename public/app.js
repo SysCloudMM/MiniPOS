@@ -15,6 +15,9 @@ class MiniPOS {
     init() {
         this.setupEventListeners();
         
+        console.log('Initializing with token:', this.token);
+        console.log('Initializing with user:', this.user);
+        
         if (this.token && this.user) {
             this.showDashboard();
             this.loadInitialData();
@@ -157,9 +160,14 @@ class MiniPOS {
                 password
             });
 
+            console.log('Login response:', response);
+
             if (response.success) {
                 this.token = response.data.token;
                 this.user = response.data.user;
+                
+                console.log('Stored token:', this.token);
+                console.log('Stored user:', this.user);
                 
                 localStorage.setItem('minipos_token', this.token);
                 localStorage.setItem('minipos_user', JSON.stringify(this.user));
@@ -170,6 +178,7 @@ class MiniPOS {
                 this.showError('Login failed: ' + response.message);
             }
         } catch (error) {
+            console.error('Login error:', error);
             this.showError('Login failed: ' + error.message);
         }
     }
@@ -252,20 +261,36 @@ class MiniPOS {
         const config = {
             method,
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
             }
         };
 
         if (this.token) {
-            config.headers.Authorization = `Bearer ${this.token}`;
+            config.headers['Authorization'] = `Bearer ${this.token}`;
         }
 
         if (data) {
             config.body = JSON.stringify(data);
         }
 
-        const response = await fetch(endpoint, config);
-        return await response.json();
+        try {
+            const response = await fetch(endpoint, config);
+            
+            // Check if response is ok
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    // Token expired or invalid, logout user
+                    this.handleLogout();
+                    throw new Error('Session expired. Please login again.');
+                }
+            }
+            
+            const result = await response.json();
+            return result;
+        } catch (error) {
+            console.error('API call error:', error);
+            throw error;
+        }
     }
 
     // Data Loading
@@ -1093,6 +1118,10 @@ class MiniPOS {
         const formData = new FormData(form);
         const userData = Object.fromEntries(formData);
         
+        console.log('Submitting user data:', userData);
+        console.log('Current token:', this.token);
+        console.log('Current user:', this.user);
+        
         // Convert checkbox value
         userData.is_active = document.getElementById('userActive').checked;
         
@@ -1109,6 +1138,8 @@ class MiniPOS {
                 response = await this.apiCall('/api/users', 'POST', userData);
             }
 
+            console.log('User submit response:', response);
+
             if (response.success) {
                 this.showSuccess('User saved successfully!');
                 this.closeModals();
@@ -1118,6 +1149,7 @@ class MiniPOS {
                 this.showError('Failed to save user: ' + response.message);
             }
         } catch (error) {
+            console.error('User submit error:', error);
             this.showError('Failed to save user: ' + error.message);
         }
     }
