@@ -190,7 +190,8 @@ const showLogin = () => {
 
 const showDashboard = () => {
     showScreen('dashboardScreen');
-    document.getElementById('userInfo').textContent = currentUser ? (currentUser.name || currentUser.username) : 'User';
+    const userName = currentUser ? (currentUser.name || currentUser.username) : 'User';
+    document.getElementById('userInfo').textContent = `Welcome, ${userName}`;
     
     // Show/hide user management based on role
     const userManagementLink = document.getElementById('userManagementLink');
@@ -403,7 +404,6 @@ const renderProductGrid = () => {
         card.innerHTML = `
             <h4>${product.name}</h4>
             <div class="price">${formatCurrency(product.price)}</div>
-            <div class="stock">Stock: ${product.stock_quantity}</div>
         `;
         grid.appendChild(card);
     });
@@ -1130,7 +1130,6 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <h4>${product.name}</h4>
                 <div class="price">${formatCurrency(product.price)}</div>
-                <div class="stock">Stock: ${product.stock_quantity}</div>
             `;
             grid.appendChild(card);
         });
