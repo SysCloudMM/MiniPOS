@@ -119,7 +119,9 @@ const initialize = () => {
       // Insert default admin user
       db.run(`
         INSERT OR REPLACE INTO users (id, name, username, email, password, role, is_active) 
-        VALUES (1, 'Administrator', 'admin', 'admin@minipos.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 1)
+        VALUES 
+          (1, 'Administrator', 'admin', 'admin@minipos.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 1),
+          (2, 'Aung Thu Myint', 'aungthumyint', 'aungthumyint@minipos.com', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'cashier', 1)
       `);
 
       // Insert default categories

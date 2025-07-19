@@ -34,7 +34,7 @@ router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     const user = await database.getRow(
-      'SELECT * FROM users WHERE username = ?',
+      'SELECT id, name, username, email, password, role, is_active FROM users WHERE username = ? AND is_active = 1',
       [username]
     );
 
@@ -42,6 +42,13 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials'
+      });
+    }
+
+    if (!user.is_active) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is disabled'
       });
     }
 
@@ -60,6 +67,7 @@ router.post('/login', async (req, res) => {
     );
 
     console.log('Generated token for user:', user.username);
+    console.log('User name field:', user.name);
 
     res.json({
       success: true,
