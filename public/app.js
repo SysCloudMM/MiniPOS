@@ -153,6 +153,12 @@ class MiniPOS {
     async handleLogin() {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
+        const errorContainer = document.getElementById('loginError');
+        
+        // Clear any existing error
+        if (errorContainer) {
+            errorContainer.style.display = 'none';
+        }
 
         try {
             const response = await this.apiCall('/api/auth/login', 'POST', {
@@ -174,12 +180,28 @@ class MiniPOS {
                 this.showDashboard();
                 this.loadInitialData();
             } else {
-                this.showError('Login failed: ' + response.message);
+                this.showLoginError('Username or Password is wrong');
             }
         } catch (error) {
             console.error('Login error:', error);
-            this.showError('Login failed: ' + error.message);
+            this.showLoginError('Username or Password is wrong');
         }
+    }
+    
+    showLoginError(message) {
+        let errorContainer = document.getElementById('loginError');
+        if (!errorContainer) {
+            // Create error container if it doesn't exist
+            errorContainer = document.createElement('div');
+            errorContainer.id = 'loginError';
+            errorContainer.className = 'login-error';
+            
+            const form = document.getElementById('loginForm');
+            form.appendChild(errorContainer);
+        }
+        
+        errorContainer.textContent = message;
+        errorContainer.style.display = 'block';
     }
 
     handleLogout() {
