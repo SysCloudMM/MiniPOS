@@ -210,7 +210,20 @@ const showSection = (sectionName) => {
     document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     });
-    document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+    
+    // Handle special cases for sub-sections
+    let navLink;
+    if (sectionName === 'users') {
+        // For users section, activate the settings nav link since users is under settings
+        navLink = document.querySelector(`[data-section="settings"]`);
+    } else {
+        navLink = document.querySelector(`[data-section="${sectionName}"]`);
+    }
+    
+    // Only add active class if the nav link exists
+    if (navLink) {
+        navLink.classList.add('active');
+    }
     
     // Update content sections
     document.querySelectorAll('.content-section').forEach(section => {
