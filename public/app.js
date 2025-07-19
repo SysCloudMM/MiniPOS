@@ -279,7 +279,7 @@ class MiniPOS {
                 productCard.className = 'product-card';
                 productCard.innerHTML = `
                     <h4>${product.name}</h4>
-                    <div class="price">$${parseFloat(product.price).toFixed(2)}</div>
+                    <div class="price">${parseFloat(product.price).toFixed(0)} MMK</div>
                     <div class="stock">Stock: ${product.stock_quantity}</div>
                 `;
                 productCard.addEventListener('click', () => {
@@ -306,7 +306,7 @@ class MiniPOS {
             productCard.className = 'product-card';
             productCard.innerHTML = `
                 <h4>${product.name}</h4>
-                <div class="price">$${parseFloat(product.price).toFixed(2)}</div>
+                <div class="price">${parseFloat(product.price).toFixed(0)} MMK</div>
                 <div class="stock">Stock: ${product.stock_quantity}</div>
             `;
             productCard.addEventListener('click', () => {
@@ -372,7 +372,7 @@ class MiniPOS {
             cartItem.innerHTML = `
                 <div class="item-info">
                     <h5>${item.name}</h5>
-                    <div class="item-price">$${item.price.toFixed(2)} each</div>
+                    <div class="item-price">${item.price.toFixed(0)} MMK each</div>
                 </div>
                 <div class="item-controls">
                     <button class="qty-btn" onclick="app.updateQuantity(${item.product_id}, -1)">-</button>
@@ -392,9 +392,9 @@ class MiniPOS {
         const tax = subtotal * 0.1; // 10% tax
         const total = subtotal + tax;
 
-        document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-        document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
-        document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+        document.getElementById('subtotal').textContent = `${subtotal.toFixed(0)} MMK`;
+        document.getElementById('tax').textContent = `${tax.toFixed(0)} MMK`;
+        document.getElementById('total').textContent = `${total.toFixed(0)} MMK`;
     }
 
     clearCart() {
@@ -458,7 +458,7 @@ class MiniPOS {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${product.name}</td>
-                <td>$${parseFloat(product.price).toFixed(2)}</td>
+                <td>${parseFloat(product.price).toFixed(0)} MMK</td>
                 <td>${product.stock_quantity}</td>
                 <td>${product.category_name || 'N/A'}</td>
                 <td>
@@ -994,7 +994,7 @@ class MiniPOS {
             row.innerHTML = `
                 <td>${date}</td>
                 <td>${sale.customer_name || 'Walk-in'}</td>
-                <td>$${parseFloat(sale.final_amount).toFixed(2)}</td>
+                <td>${parseFloat(sale.final_amount).toFixed(0)} MMK</td>
                 <td>${sale.payment_method}</td>
                 <td><span class="status-badge status-${sale.status}">${sale.status}</span></td>
                 <td>
@@ -1013,7 +1013,7 @@ class MiniPOS {
             if (response.success) {
                 // For now, just show an alert with sale details
                 // In a real app, you'd show a detailed modal
-                alert(`Sale #${id}\nTotal: $${response.data.final_amount}\nItems: ${response.data.items.length}`);
+                alert(`Sale #${id}\nTotal: ${parseFloat(response.data.final_amount).toFixed(0)} MMK\nItems: ${response.data.items.length}`);
             }
         } catch (error) {
             this.showError('Failed to load sale details: ' + error.message);
@@ -1050,11 +1050,11 @@ class MiniPOS {
                 </div>
                 <div class="stat">
                     <h4>Total Revenue</h4>
-                    <p>$${parseFloat(summary.total_revenue || 0).toFixed(2)}</p>
+                    <p>${parseFloat(summary.total_revenue || 0).toFixed(0)} MMK</p>
                 </div>
                 <div class="stat">
                     <h4>Average Sale</h4>
-                    <p>$${parseFloat(summary.average_sale || 0).toFixed(2)}</p>
+                    <p>${parseFloat(summary.average_sale || 0).toFixed(0)} MMK</p>
                 </div>
             </div>
         `;
@@ -1067,7 +1067,7 @@ class MiniPOS {
                 <li>
                     <strong>${product.name}</strong><br>
                     Sold: ${product.total_quantity} units<br>
-                    Revenue: $${parseFloat(product.total_revenue).toFixed(2)}
+                    Revenue: ${parseFloat(product.total_revenue).toFixed(0)} MMK
                 </li>
             `).join('') +
         '</ul>';
