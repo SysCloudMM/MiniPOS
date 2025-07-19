@@ -440,10 +440,6 @@ body {
     }
 }
 
-/* Ensure Settings link follows same alignment rules */
-#settingsLink {
-    /* Settings link inherits all styles from .nav-link */
-}
 
 .content {
     flex: 1;
