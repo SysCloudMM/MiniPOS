@@ -626,11 +626,13 @@ body {
   align-items: center;
   justify-content: center;
   font-size: var(--text-base);
+  flex-shrink: 0;
 }
 
 .nav-text {
   font-size: var(--text-sm);
   font-weight: 500;
+  line-height: 1.2;
 }
 
 .nav-indicator {
