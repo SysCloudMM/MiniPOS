@@ -140,9 +140,13 @@ const initialize = () => {
 
       // Insert sample products for testing
       db.run(`
-        INSERT OR IGNORE INTO products (id, name, description, price, cost, stock_quantity, min_stock, category_id, is_active) 
+        INSERT OR IGNORE INTO products (name, description, price, cost, stock_quantity, min_stock, category_id, is_active) 
         VALUES 
-          (1, 'Sample Product', 'This is a sample product for testing', 1000, 800, 50, 10, 1, 1)
+          ('Sample Product', 'This is a sample product for testing', 1000, 800, 50, 10, 1, 1),
+          ('Coffee', 'Premium coffee beans', 2500, 2000, 100, 20, 4, 1),
+          ('Notebook', 'A4 spiral notebook', 500, 400, 200, 50, 5, 1),
+          ('Smartphone', 'Latest smartphone model', 150000, 120000, 25, 5, 2, 1),
+          ('T-Shirt', 'Cotton t-shirt', 3000, 2500, 75, 15, 3, 1)
       `);
 
       console.log('Database initialized successfully');

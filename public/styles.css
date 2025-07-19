@@ -1418,6 +1418,14 @@ textarea {
     font-size: 0.8rem;
 }
 
+.no-products {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-style: italic;
+}
+
 @media (min-width: 768px) {
     .country-code-select option {
         font-size: 0.9rem;

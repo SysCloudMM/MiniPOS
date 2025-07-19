@@ -324,6 +324,8 @@ const loadProducts = async () => {
 
 const renderProducts = () => {
     const tbody = document.getElementById('productsTable');
+    if (!tbody) return;
+    
     tbody.innerHTML = '';
     
     products.forEach(product => {
@@ -348,9 +350,18 @@ const renderProducts = () => {
 
 const renderProductGrid = () => {
     const grid = document.getElementById('productGrid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
     
-    products.filter(p => p.is_active).forEach(product => {
+    const activeProducts = products.filter(p => p.is_active !== false);
+    
+    if (activeProducts.length === 0) {
+        grid.innerHTML = '<div class="no-products">No products available</div>';
+        return;
+    }
+    
+    activeProducts.forEach(product => {
         const card = document.createElement('div');
         card.className = 'product-card';
         card.onclick = () => addToCart(product);
