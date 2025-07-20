@@ -2032,3 +2032,75 @@ textarea {
     border: 1px solid var(--gray-300);
   }
 }
+
+/* Notification styles */
+.notification {
+  position: fixed;
+  top: var(--space-4);
+  right: var(--space-4);
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--gray-200);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 300px;
+  max-width: 500px;
+  z-index: 1100;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.notification.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.notification-success {
+  border-left: 4px solid var(--success-500);
+}
+
+.notification-success .notification-content i {
+  color: var(--success-500);
+}
+
+.notification-error {
+  border-left: 4px solid var(--error-500);
+}
+
+.notification-error .notification-content i {
+  color: var(--error-500);
+}
+
+.notification-info {
+  border-left: 4px solid var(--primary-500);
+}
+
+.notification-info .notification-content i {
+  color: var(--primary-500);
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  padding: var(--space-1);
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--gray-400);
+  transition: all 0.2s ease;
+}
+
+.notification-close:hover {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
