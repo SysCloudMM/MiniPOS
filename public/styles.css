@@ -1751,6 +1751,269 @@ textarea {
   }
 }
 
+/* Admin Panel Styles */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: var(--space-6);
+}
+
+.admin-card {
+  background: white;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+
+.admin-card .card-header {
+  background: var(--gray-50);
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-card .card-header h3 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.admin-card .card-header i {
+  color: var(--primary-500);
+  font-size: var(--text-xl);
+}
+
+.admin-card .card-content {
+  padding: var(--space-6);
+}
+
+.admin-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.users-list {
+  margin-top: var(--space-4);
+}
+
+.users-list.hidden {
+  display: none;
+}
+
+.settings-form .form-group {
+  margin-bottom: var(--space-5);
+}
+
+.settings-form label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--gray-700);
+  margin-bottom: var(--space-2);
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.logo-upload-area {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-lg);
+  background: var(--gray-50);
+}
+
+.current-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.logo-preview {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: var(--text-xl);
+}
+
+.current-logo span {
+  font-size: var(--text-xs);
+  color: var(--gray-600);
+}
+
+.database-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.action-group {
+  padding: var(--space-4);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: var(--gray-50);
+}
+
+.action-group h4 {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: var(--space-1);
+}
+
+.action-group p {
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  margin-bottom: var(--space-3);
+}
+
+.export-options,
+.import-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.system-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  background: var(--gray-50);
+  border-radius: var(--radius);
+}
+
+.info-item .label {
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.info-item .value {
+  font-size: var(--text-sm);
+  color: var(--gray-900);
+  font-weight: 600;
+}
+
+/* Checkbox styles */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--gray-700);
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+  background: var(--primary-500);
+  border-color: var(--primary-500);
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Role badges in admin panel */
+.role-badge.role-admin {
+  background: var(--error-500);
+  color: white;
+}
+
+.role-badge.role-manager {
+  background: var(--warning-500);
+  color: white;
+}
+
+.role-badge.role-cashier {
+  background: var(--gray-500);
+  color: white;
+}
+
+/* Status badges */
+.status-active {
+  background: var(--success-50);
+  color: var(--success-700);
+}
+
+.status-inactive {
+  background: var(--error-50);
+  color: var(--error-700);
+}
+
+/* Responsive admin panel */
+@media (max-width: 768px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .admin-actions {
+    flex-direction: column;
+  }
+  
+  .export-options,
+  .import-options {
+    flex-direction: column;
+  }
+  
+  .logo-upload-area {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
 /* Print styles */
 @media print {
   .sidebar,

@@ -143,6 +143,15 @@
                                             <div class="nav-indicator"></div>
                                         </a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a href="#" data-section="admin" class="nav-link">
+                                            <div class="nav-icon">
+                                                <i class="fas fa-cog"></i>
+                                            </div>
+                                            <span class="nav-text">Admin Panel</span>
+                                            <div class="nav-indicator"></div>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                             <div class="nav-section">
@@ -467,6 +476,190 @@
                         </div>
                     </section>
 
+                    <!-- Admin Panel Section -->
+                    <section id="adminSection" class="content-section">
+                        <div class="section-header">
+                            <div class="header-left">
+                                <h1 class="section-title">Admin Panel</h1>
+                                <p class="section-subtitle">System administration and configuration</p>
+                            </div>
+                        </div>
+
+                        <div class="admin-grid">
+                            <!-- User Management Card -->
+                            <div class="admin-card">
+                                <div class="card-header">
+                                    <h3>User Management</h3>
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="card-content">
+                                    <div class="admin-actions">
+                                        <button id="addUserBtn" class="btn btn-primary">
+                                            <i class="fas fa-plus"></i>
+                                            Add User
+                                        </button>
+                                        <button id="viewUsersBtn" class="btn btn-outline">
+                                            <i class="fas fa-list"></i>
+                                            View All Users
+                                        </button>
+                                    </div>
+                                    <div id="usersList" class="users-list hidden">
+                                        <div class="table-container">
+                                            <table class="data-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Username</th>
+                                                        <th>Role</th>
+                                                        <th>Status</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="usersTable">
+                                                    <!-- Users will be loaded here -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- System Settings Card -->
+                            <div class="admin-card">
+                                <div class="card-header">
+                                    <h3>System Settings</h3>
+                                    <i class="fas fa-cogs"></i>
+                                </div>
+                                <div class="card-content">
+                                    <div class="settings-form">
+                                        <div class="form-group">
+                                            <label for="systemName">System Name</label>
+                                            <input type="text" id="systemName" value="MiniPOS" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="systemDescription">Description</label>
+                                            <textarea id="systemDescription" rows="3" class="form-input">A comprehensive Point of Sale system for retail operations</textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="logoUpload">System Logo</label>
+                                            <div class="logo-upload-area">
+                                                <div class="current-logo">
+                                                    <div class="logo-preview">
+                                                        <i class="fas fa-store"></i>
+                                                    </div>
+                                                    <span>Current Logo</span>
+                                                </div>
+                                                <input type="file" id="logoUpload" accept="image/*" class="hidden">
+                                                <button type="button" onclick="document.getElementById('logoUpload').click()" class="btn btn-outline">
+                                                    <i class="fas fa-upload"></i>
+                                                    Upload Logo
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <button id="saveSettingsBtn" class="btn btn-primary">
+                                            <i class="fas fa-save"></i>
+                                            Save Settings
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Database Management Card -->
+                            <div class="admin-card">
+                                <div class="card-header">
+                                    <h3>Database Management</h3>
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="card-content">
+                                    <div class="database-actions">
+                                        <div class="action-group">
+                                            <h4>Export Data</h4>
+                                            <p>Download your data as JSON files</p>
+                                            <div class="export-options">
+                                                <button id="exportProductsBtn" class="btn btn-outline btn-sm">
+                                                    <i class="fas fa-download"></i>
+                                                    Export Products
+                                                </button>
+                                                <button id="exportCustomersBtn" class="btn btn-outline btn-sm">
+                                                    <i class="fas fa-download"></i>
+                                                    Export Customers
+                                                </button>
+                                                <button id="exportSalesBtn" class="btn btn-outline btn-sm">
+                                                    <i class="fas fa-download"></i>
+                                                    Export Sales
+                                                </button>
+                                                <button id="exportAllBtn" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-download"></i>
+                                                    Export All Data
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="action-group">
+                                            <h4>Import Data</h4>
+                                            <p>Upload JSON files to import data</p>
+                                            <div class="import-options">
+                                                <input type="file" id="importFile" accept=".json" class="hidden">
+                                                <button type="button" onclick="document.getElementById('importFile').click()" class="btn btn-warning">
+                                                    <i class="fas fa-upload"></i>
+                                                    Import Data
+                                                </button>
+                                                <small class="form-hint">Supported: Products, Categories, Customers</small>
+                                            </div>
+                                        </div>
+                                        <div class="action-group">
+                                            <h4>Database Backup</h4>
+                                            <p>Create a complete backup of your database</p>
+                                            <button id="backupDbBtn" class="btn btn-success">
+                                                <i class="fas fa-shield-alt"></i>
+                                                Create Backup
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- System Information Card -->
+                            <div class="admin-card">
+                                <div class="card-header">
+                                    <h3>System Information</h3>
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <div class="card-content">
+                                    <div class="system-info">
+                                        <div class="info-item">
+                                            <span class="label">Version:</span>
+                                            <span class="value">1.0.0</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="label">Database:</span>
+                                            <span class="value">SQLite</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="label">Total Products:</span>
+                                            <span class="value" id="totalProducts">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="label">Total Customers:</span>
+                                            <span class="value" id="totalCustomers">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="label">Total Sales:</span>
+                                            <span class="value" id="totalSales">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="label">Total Users:</span>
+                                            <span class="value" id="totalUsers">-</span>
+                                        </div>
+                                    </div>
+                                    <button id="refreshStatsBtn" class="btn btn-outline">
+                                        <i class="fas fa-sync-alt"></i>
+                                        Refresh Statistics
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
                 </main>
             </div>
         </div>
@@ -609,6 +802,62 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-ghost modal-cancel">Cancel</button>
                 <button type="submit" form="customerForm" class="btn btn-primary">Save Customer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="userModalTitle">Add User</h3>
+                <button class="modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="userName">Full Name</label>
+                            <input type="text" id="userName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userUsername">Username</label>
+                            <input type="text" id="userUsername" name="username" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">Email</label>
+                        <input type="email" id="userEmail" name="email" required>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="userPassword">Password</label>
+                            <input type="password" id="userPassword" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userRole">Role</label>
+                            <select id="userRole" name="role" required>
+                                <option value="cashier">Cashier</option>
+                                <option value="manager">Manager</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="userActive" name="is_active" checked>
+                            <span class="checkmark"></span>
+                            Active User
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-ghost modal-cancel">Cancel</button>
+                <button type="submit" form="userForm" class="btn btn-primary">Save User</button>
             </div>
         </div>
     </div>

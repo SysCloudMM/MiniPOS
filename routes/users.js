@@ -10,7 +10,7 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // Only admin and manager can access user management
-router.use(authorizeRole(['admin', 'manager']));
+// Note: Some endpoints are restricted to admin only
 
 // Validation schemas
 const userSchema = Joi.object({
@@ -36,7 +36,7 @@ const updateUserSchema = Joi.object({
 });
 
 // Get all users
-router.get('/', async (req, res) => {
+router.get('/', authorizeRole(['admin', 'manager']), async (req, res) => {
   try {
     const { search, role, active } = req.query;
     let sql = 'SELECT id, name, username, email, role, is_active, created_at, updated_at FROM users WHERE 1=1';
@@ -75,7 +75,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get single user
-router.get('/:id', async (req, res) => {
+router.get('/:id', authorizeRole(['admin', 'manager']), async (req, res) => {
   try {
     const user = await database.getRow(
       'SELECT id, name, username, email, role, is_active, created_at, updated_at FROM users WHERE id = ?',

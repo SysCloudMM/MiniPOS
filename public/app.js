@@ -13,6 +13,13 @@ let currentPosPage = 1;
 let currentUsersPage = 1;
 const itemsPerPage = 12;
 
+// Admin panel variables
+let systemSettings = {
+    name: 'MiniPOS',
+    description: 'A comprehensive Point of Sale system for retail operations',
+    logo: null
+};
+
 // API Base URL
 const API_BASE = '/api';
 
@@ -239,6 +246,14 @@ const showSection = (sectionName) => {
             break;
         case 'reports':
             loadReports();
+            break;
+        case 'admin':
+            if (currentUser && currentUser.role === 'admin') {
+                loadAdminPanel();
+            } else {
+                showAlert('Access denied. Admin privileges required.', 'error');
+                showSection('pos');
+            }
             break;
     }
 };
@@ -821,6 +836,323 @@ const renderTopProducts = (products) => {
     container.innerHTML = html;
 };
 
+// Admin Panel Functions
+const loadAdminPanel = async () => {
+    await loadSystemStats();
+    setupAdminEventListeners();
+};
+
+const loadSystemStats = async () => {
+    try {
+        const [products, customers, sales, users] = await Promise.all([
+            apiCall('/products'),
+            apiCall('/customers'),
+            apiCall('/sales'),
+            apiCall('/users')
+        ]);
+        
+        document.getElementById('totalProducts').textContent = products.data.length;
+        document.getElementById('totalCustomers').textContent = customers.data.length;
+        document.getElementById('totalSales').textContent = sales.data.length;
+        document.getElementById('totalUsers').textContent = users.data.length;
+    } catch (error) {
+        console.error('Failed to load system stats:', error);
+    }
+};
+
+const loadUsers = async () => {
+    try {
+        const response = await apiCall('/users');
+        users = response.data;
+        renderUsers();
+        document.getElementById('usersList').classList.remove('hidden');
+    } catch (error) {
+        console.error('Failed to load users:', error);
+        showAlert('Failed to load users: ' + error.message, 'error');
+    }
+};
+
+const renderUsers = () => {
+    const tbody = document.getElementById('usersTable');
+    tbody.innerHTML = '';
+    
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${user.name}</td>
+            <td>${user.username}</td>
+            <td><span class="role-badge role-${user.role}">${user.role}</span></td>
+            <td><span class="status-badge status-${user.is_active ? 'active' : 'inactive'}">${user.is_active ? 'Active' : 'Inactive'}</span></td>
+            <td>
+                <button class="btn btn-small btn-warning" onclick="editUser(${user.id})">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn btn-small ${user.is_active ? 'btn-warning' : 'btn-success'}" onclick="toggleUserStatus(${user.id})">
+                    <i class="fas fa-${user.is_active ? 'ban' : 'check'}"></i> ${user.is_active ? 'Disable' : 'Enable'}
+                </button>
+                ${currentUser.id !== user.id ? `
+                    <button class="btn btn-small btn-danger" onclick="deleteUser(${user.id})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                ` : ''}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+};
+
+const saveUser = async (userData, isEdit = false, userId = null) => {
+    try {
+        const endpoint = isEdit ? `/users/${userId}` : '/users';
+        const method = isEdit ? 'PUT' : 'POST';
+        
+        const response = await apiCall(endpoint, {
+            method,
+            body: JSON.stringify(userData)
+        });
+        
+        showAlert(`User ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
+        closeModal('userModal');
+        loadUsers();
+    } catch (error) {
+        showAlert('Failed to save user: ' + error.message, 'error');
+    }
+};
+
+const editUser = (id) => {
+    const user = users.find(u => u.id === id);
+    if (!user) return;
+    
+    document.getElementById('userModalTitle').textContent = 'Edit User';
+    document.getElementById('userName').value = user.name;
+    document.getElementById('userUsername').value = user.username;
+    document.getElementById('userEmail').value = user.email;
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userPassword').required = false;
+    document.getElementById('userRole').value = user.role;
+    document.getElementById('userActive').checked = user.is_active;
+    
+    document.getElementById('userForm').onsubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const userData = {
+            name: formData.get('name'),
+            username: formData.get('username'),
+            email: formData.get('email'),
+            password: formData.get('password'),
+            role: formData.get('role'),
+            is_active: formData.get('is_active') === 'on'
+        };
+        saveUser(userData, true, id);
+    };
+    
+    openModal('userModal');
+};
+
+const toggleUserStatus = async (id) => {
+    try {
+        await apiCall(`/users/${id}/toggle-status`, { method: 'PATCH' });
+        showAlert('User status updated successfully!', 'success');
+        loadUsers();
+    } catch (error) {
+        showAlert('Failed to update user status: ' + error.message, 'error');
+    }
+};
+
+const deleteUser = async (id) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    
+    try {
+        await apiCall(`/users/${id}`, { method: 'DELETE' });
+        showAlert('User deleted successfully!', 'success');
+        loadUsers();
+    } catch (error) {
+        showAlert('Failed to delete user: ' + error.message, 'error');
+    }
+};
+
+const saveSystemSettings = () => {
+    const name = document.getElementById('systemName').value;
+    const description = document.getElementById('systemDescription').value;
+    
+    systemSettings.name = name;
+    systemSettings.description = description;
+    
+    // Update the brand text in the navbar
+    document.querySelector('.brand-text').textContent = name;
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('systemSettings', JSON.stringify(systemSettings));
+    
+    showAlert('System settings saved successfully!', 'success');
+};
+
+const loadSystemSettings = () => {
+    const saved = localStorage.getItem('systemSettings');
+    if (saved) {
+        systemSettings = JSON.parse(saved);
+        document.getElementById('systemName').value = systemSettings.name;
+        document.getElementById('systemDescription').value = systemSettings.description;
+        document.querySelector('.brand-text').textContent = systemSettings.name;
+    }
+};
+
+const handleLogoUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+        showAlert('Please select a valid image file', 'error');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const logoPreview = document.querySelector('.logo-preview');
+        logoPreview.innerHTML = `<img src="${e.target.result}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit;">`;
+        
+        systemSettings.logo = e.target.result;
+        localStorage.setItem('systemSettings', JSON.stringify(systemSettings));
+        
+        showAlert('Logo uploaded successfully!', 'success');
+    };
+    reader.readAsDataURL(file);
+};
+
+const exportData = async (type) => {
+    try {
+        let data, filename;
+        
+        switch (type) {
+            case 'products':
+                const productsResponse = await apiCall('/products');
+                data = productsResponse.data;
+                filename = 'minipos-products.json';
+                break;
+            case 'customers':
+                const customersResponse = await apiCall('/customers');
+                data = customersResponse.data;
+                filename = 'minipos-customers.json';
+                break;
+            case 'sales':
+                const salesResponse = await apiCall('/sales');
+                data = salesResponse.data;
+                filename = 'minipos-sales.json';
+                break;
+            case 'all':
+                const [products, customers, sales, categories] = await Promise.all([
+                    apiCall('/products'),
+                    apiCall('/customers'),
+                    apiCall('/sales'),
+                    apiCall('/categories')
+                ]);
+                data = {
+                    products: products.data,
+                    customers: customers.data,
+                    sales: sales.data,
+                    categories: categories.data,
+                    exported_at: new Date().toISOString()
+                };
+                filename = 'minipos-complete-backup.json';
+                break;
+        }
+        
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showAlert(`${type === 'all' ? 'Complete backup' : type} exported successfully!`, 'success');
+    } catch (error) {
+        showAlert('Failed to export data: ' + error.message, 'error');
+    }
+};
+
+const handleDataImport = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.includes('json')) {
+        showAlert('Please select a valid JSON file', 'error');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // Validate and import data
+            if (data.products && Array.isArray(data.products)) {
+                showAlert('Import functionality is not yet implemented. This feature will be available in a future update.', 'warning');
+            } else if (Array.isArray(data)) {
+                showAlert('Import functionality is not yet implemented. This feature will be available in a future update.', 'warning');
+            } else {
+                showAlert('Invalid file format. Please check your JSON file.', 'error');
+            }
+        } catch (error) {
+            showAlert('Failed to parse JSON file: ' + error.message, 'error');
+        }
+    };
+    reader.readAsText(file);
+    
+    // Reset file input
+    event.target.value = '';
+};
+
+const createDatabaseBackup = async () => {
+    try {
+        // This would typically call a backend endpoint to create a database backup
+        showAlert('Database backup functionality requires server-side implementation. Contact your system administrator.', 'warning');
+    } catch (error) {
+        showAlert('Failed to create backup: ' + error.message, 'error');
+    }
+};
+
+const setupAdminEventListeners = () => {
+    // User management buttons
+    document.getElementById('addUserBtn').onclick = () => {
+        document.getElementById('userModalTitle').textContent = 'Add User';
+        document.getElementById('userPassword').required = true;
+        document.getElementById('userForm').onsubmit = (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const userData = {
+                name: formData.get('name'),
+                username: formData.get('username'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                role: formData.get('role'),
+                is_active: formData.get('is_active') === 'on'
+            };
+            saveUser(userData);
+        };
+        openModal('userModal');
+    };
+    
+    document.getElementById('viewUsersBtn').onclick = loadUsers;
+    
+    // System settings
+    document.getElementById('saveSettingsBtn').onclick = saveSystemSettings;
+    document.getElementById('logoUpload').onchange = handleLogoUpload;
+    
+    // Database management
+    document.getElementById('exportProductsBtn').onclick = () => exportData('products');
+    document.getElementById('exportCustomersBtn').onclick = () => exportData('customers');
+    document.getElementById('exportSalesBtn').onclick = () => exportData('sales');
+    document.getElementById('exportAllBtn').onclick = () => exportData('all');
+    document.getElementById('importFile').onchange = handleDataImport;
+    document.getElementById('backupDbBtn').onclick = createDatabaseBackup;
+    
+    // System info
+    document.getElementById('refreshStatsBtn').onclick = loadSystemStats;
+};
+
 // Cart management
 const addToCart = (product) => {
     if (product.stock_quantity <= 0) {
@@ -1050,6 +1382,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check authentication on page load
     checkAuth();
     
+    // Load system settings
+    loadSystemSettings();
+    
     // Sidebar toggle functionality
     const sidebarToggle = document.getElementById('sidebarToggle');
     const sidebar = document.getElementById('sidebar');
@@ -1092,6 +1427,13 @@ document.addEventListener('DOMContentLoaded', () => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const section = link.getAttribute('data-section');
+            
+            // Check admin access
+            if (section === 'admin' && (!currentUser || currentUser.role !== 'admin')) {
+                showAlert('Access denied. Admin privileges required.', 'error');
+                return;
+            }
+            
             showSection(section);
         });
     });
@@ -1245,5 +1587,28 @@ document.addEventListener('DOMContentLoaded', () => {
             renderProductGrid();
         }
     });
+    
+    // Hide admin panel link for non-admin users
+    const adminLink = document.querySelector('[data-section="admin"]');
+    if (adminLink) {
+        const checkAdminAccess = () => {
+            if (!currentUser || currentUser.role !== 'admin') {
+                adminLink.style.display = 'none';
+            } else {
+                adminLink.style.display = 'block';
+            }
+        };
+        
+        // Check initially and whenever user changes
+        checkAdminAccess();
+        
+        // Re-check when user logs in
+        const originalLogin = login;
+        window.login = async (...args) => {
+            const result = await originalLogin(...args);
+            checkAdminAccess();
+            return result;
+        };
+    }
     
 });
