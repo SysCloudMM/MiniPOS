@@ -319,6 +319,10 @@ class MiniPOS {
                 this.token = response.data.token;
                 this.currentUser = response.data.user;
                 localStorage.setItem('minipos_token', this.token);
+                
+                // Clear any cached navigation state
+                this.clearNavigationCache();
+                
                 this.showDashboard();
                 this.showNotification('Login successful!', 'success');
             } else {
@@ -330,12 +334,57 @@ class MiniPOS {
         }
     }
 
+    // Clear navigation cache
+    clearNavigationCache() {
+        // Reset all navigation links to default state
+        const adminNavLink = document.querySelector('.admin-nav-link');
+        if (adminNavLink) {
+            adminNavLink.classList.remove('visible');
+            adminNavLink.style.display = 'none';
+        }
+        
+        // Reset all active states
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        
+        // Reset all content sections
+        document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+        });
+    }
+
     logout() {
+        // Clear all stored data
         this.token = null;
         this.currentUser = null;
         this.cart = [];
         localStorage.removeItem('minipos_token');
+        
+        // Clear navigation cache
+        this.clearNavigationCache();
+        
+        // Reset user info display
+        const userInfo = document.getElementById('userInfo');
+        if (userInfo) {
+            userInfo.textContent = 'Welcome, User';
+        }
+        
+        // Reset user role display
+        const userRole = document.querySelector('.user-role');
+        if (userRole) {
+            userRole.textContent = 'User';
+        }
+        
+        // Show login screen
         this.showLogin();
+        
+        // Reset login form
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.reset();
+        }
+        
         this.showNotification('Logged out successfully', 'info');
     }
 
@@ -349,10 +398,7 @@ class MiniPOS {
         document.getElementById('dashboardScreen').classList.add('active');
         
         // Update user info
-        const userInfo = document.getElementById('userInfo');
-        if (userInfo && this.currentUser) {
-            userInfo.textContent = `Welcome, ${this.currentUser.name || this.currentUser.username}`;
-        }
+        this.updateUserInfo(this.currentUser);
 
         // Show/hide admin panel based on role
         this.updateNavigationForRole();
@@ -362,13 +408,47 @@ class MiniPOS {
         this.loadCategories();
     }
 
+    // Update user info in navbar
+    updateUserInfo(user) {
+        const userInfo = document.getElementById('userInfo');
+        const userRole = document.querySelector('.user-role');
+        
+        if (userInfo) {
+            userInfo.textContent = `Welcome, ${user.name || user.username}`;
+        }
+        
+        if (userRole) {
+            // Properly display role
+            const roleDisplayMap = {
+                'admin': 'Administrator',
+                'manager': 'Manager', 
+                'cashier': 'Cashier'
+            };
+            userRole.textContent = roleDisplayMap[user.role] || 'User';
+        }
+    }
+
     updateNavigationForRole() {
+        console.log('Updating navigation for role:', this.currentUser?.role);
+        
         const adminNavLink = document.querySelector('.admin-nav-link');
+        
+        // Always start by hiding the admin panel
         if (adminNavLink) {
-            if (this.currentUser && (this.currentUser.role === 'admin' || this.currentUser.role === 'manager')) {
+            adminNavLink.classList.remove('visible');
+            adminNavLink.style.display = 'none';
+        }
+        
+        // Only show admin panel for admin and manager roles
+        if (adminNavLink && this.currentUser) {
+            if (this.currentUser.role === 'admin' || this.currentUser.role === 'manager') {
                 adminNavLink.classList.add('visible');
+                adminNavLink.style.display = 'flex';
+                console.log('Admin panel shown for role:', this.currentUser.role);
             } else {
                 adminNavLink.classList.remove('visible');
+                adminNavLink.style.display = 'none';
+                console.log('Admin panel hidden for role:', this.currentUser.role);
             }
         }
 
