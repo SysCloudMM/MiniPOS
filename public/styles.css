@@ -646,6 +646,15 @@ body {
   transition: opacity 0.2s ease;
 }
 
+/* Admin Panel Navigation Link */
+.admin-nav-link {
+  display: none !important;
+}
+
+.admin-nav-link.visible {
+  display: flex !important;
+}
+
 /* Main Content */
 .main-content {
   flex: 1;
