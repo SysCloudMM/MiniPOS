@@ -363,12 +363,12 @@ class MiniPOS {
     }
 
     updateNavigationForRole() {
-        const adminNavLink = document.querySelector('[data-section="admin"]');
+        const adminNavLink = document.querySelector('.admin-nav-link');
         if (adminNavLink) {
             if (this.currentUser && (this.currentUser.role === 'admin' || this.currentUser.role === 'manager')) {
-                adminNavLink.style.display = 'block';
+                adminNavLink.classList.add('visible');
             } else {
-                adminNavLink.style.display = 'none';
+                adminNavLink.classList.remove('visible');
             }
         }
 
