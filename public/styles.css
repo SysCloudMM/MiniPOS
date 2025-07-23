@@ -545,12 +545,11 @@ body {
   background: rgba(14, 165, 233, 0.1);
   color: var(--primary-700);
   transform: translateX(4px);
+}
 
 .nav-link.active {
   background: var(--primary-500);
-  background: var(--primary-500);
   color: var(--primary-700);
-  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
   background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
   color: white;
   box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
@@ -820,34 +819,16 @@ body {
   background: linear-gradient(135deg, var(--success-600), var(--success-700)) !important;
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
-  color: white !important;
 }
 
 .btn-checkout:active {
   background: linear-gradient(135deg, var(--success-700), var(--success-800)) !important;
   transform: translateY(0);
-  color: white !important;
 }
 
 .btn-checkout:focus {
-  color: white !important;
   outline: 2px solid var(--success-300);
   outline-offset: 2px;
-  background: linear-gradient(135deg, var(--success-500), var(--success-600)) !important;
-}
-
-/* Fix for any white background issues on checkout button */
-.btn-checkout,
-.btn-checkout:visited {
-  background: linear-gradient(135deg, var(--success-500), var(--success-600)) !important;
-  color: white !important;
-}
-
-.btn-checkout:hover,
-.btn-checkout:focus,
-.btn-checkout:active {
-  background: linear-gradient(135deg, var(--success-600), var(--success-700)) !important;
-  color: white !important;
 }
 
 /* POS Layout */
