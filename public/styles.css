@@ -809,6 +809,18 @@ body {
   color: white;
 }
 
+.btn-checkout:active {
+  background: linear-gradient(135deg, var(--success-700), var(--success-800));
+  transform: translateY(0);
+  color: white !important;
+}
+
+.btn-checkout:focus {
+  color: white !important;
+  outline: 2px solid var(--success-300);
+  outline-offset: 2px;
+}
+
 /* POS Layout */
 .pos-layout {
   display: grid;
