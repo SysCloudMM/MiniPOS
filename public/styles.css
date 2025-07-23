@@ -378,40 +378,7 @@ body {
 }
 
 .navbar-center {
-  flex: 1;
-  max-width: 500px;
-  margin: 0 var(--space-8);
-}
-
-.search-bar {
-  position: relative;
-  width: 100%;
-}
-
-.search-bar i {
-  position: absolute;
-  left: var(--space-4);
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--gray-400);
-  font-size: var(--text-sm);
-}
-
-.search-bar input {
-  width: 100%;
-  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-12);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--radius-lg);
-  background: var(--gray-50);
-  font-size: var(--text-sm);
-  transition: all 0.3s ease;
-}
-
-.search-bar input:focus {
-  outline: none;
-  border-color: var(--primary-500);
-  background: white;
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  flex: 0;
 }
 
 .navbar-right {
@@ -422,36 +389,7 @@ body {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-}
-
-.nav-action-btn {
-  position: relative;
-  background: none;
-  border: none;
-  padding: var(--space-2);
-  border-radius: var(--radius);
-  cursor: pointer;
-  color: var(--gray-600);
-  transition: all 0.2s ease;
-}
-
-.nav-action-btn:hover {
-  background: var(--gray-100);
-  color: var(--gray-900);
-}
-
-.notification-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background: var(--error-500);
-  color: white;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  min-width: 18px;
-  text-align: center;
+  gap: 0;
 }
 
 .user-menu {
@@ -1621,10 +1559,6 @@ textarea {
   .top-navbar {
     padding: 0 var(--space-4);
     height: var(--navbar-height);
-  }
-
-  .navbar-center {
-    display: none;
   }
 
   .sidebar {
