@@ -317,8 +317,8 @@ body {
 /* Top Navigation */
 .top-navbar {
   height: var(--navbar-height);
-  background: white;
-  border-bottom: 1px solid var(--gray-200);
+  background: linear-gradient(135deg, white 0%, #f8f9fa 100%);
+  border-bottom: 2px solid var(--gray-200);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -326,7 +326,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-left {
@@ -360,22 +360,25 @@ body {
 .brand-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  background: linear-gradient(135deg, #ff4757, #ff3742);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
 }
 
 .brand-icon i {
   color: white;
   font-size: var(--text-lg);
+  font-weight: bold;
 }
 
 .brand-text {
   font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--gray-900);
+  font-weight: 800;
+  color: #2c3e50;
+  letter-spacing: -0.5px;
 }
 
 .navbar-center {
@@ -486,61 +489,72 @@ body {
 /* Sidebar */
 .sidebar {
   width: var(--sidebar-width);
-  background: white;
-  border-right: 1px solid var(--gray-200);
+  background: #f8f9fa;
+  border-right: 1px solid var(--gray-300);
   transition: all 0.3s ease;
   position: relative;
   z-index: 50;
   overflow-y: auto;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-content {
-  padding: var(--space-6) 0;
+  padding: var(--space-4) 0;
   height: 100%;
 }
 
 .nav-section {
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
 }
 
 .nav-section-title {
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--gray-500);
+  color: var(--gray-600);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: var(--space-4);
-  padding: 0 var(--space-6);
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-3);
+  padding: 0 var(--space-4);
+  font-size: 11px;
 }
 
 .nav-menu {
   list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .nav-item {
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--space-2);
+  padding: 0 var(--space-4);
 }
 
 .nav-link {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-6);
-  color: var(--gray-700);
+  padding: var(--space-3) var(--space-4);
+  color: var(--gray-800);
   text-decoration: none;
   transition: all 0.2s ease;
   position: relative;
-  border-radius: 0;
+  border-radius: var(--radius-lg);
+  font-weight: 500;
 }
 
 .nav-link:hover {
-  background: var(--gray-50);
-  color: var(--gray-900);
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--primary-700);
+  transform: translateX(4px);
 }
 
 .nav-link.active {
-  background: var(--primary-50);
+  background: var(--primary-500);
   color: var(--primary-700);
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+  color: white;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  transform: translateX(4px);
 }
 
 .nav-link.active .nav-indicator {
@@ -548,30 +562,31 @@ body {
 }
 
 .nav-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
   flex-shrink: 0;
 }
 
 .nav-text {
-  font-size: var(--text-sm);
-  font-weight: 500;
+  font-size: var(--text-base);
+  font-weight: 600;
   line-height: 1.2;
 }
 
 .nav-indicator {
   position: absolute;
-  right: 0;
+  left: 0;
   top: 0;
   bottom: 0;
-  width: 3px;
+  width: 4px;
   background: var(--primary-500);
   opacity: 0;
   transition: opacity 0.2s ease;
+  border-radius: 0 2px 2px 0;
 }
 
 /* Admin Panel Navigation Link */
@@ -803,14 +818,14 @@ body {
 }
 
 .btn-checkout:hover {
-  background: linear-gradient(135deg, var(--success-600), var(--success-700));
+  background: linear-gradient(135deg, var(--success-600), var(--success-700)) !important;
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
-  color: white;
+  color: white !important;
 }
 
 .btn-checkout:active {
-  background: linear-gradient(135deg, var(--success-700), var(--success-800));
+  background: linear-gradient(135deg, var(--success-700), var(--success-800)) !important;
   transform: translateY(0);
   color: white !important;
 }
@@ -819,6 +834,21 @@ body {
   color: white !important;
   outline: 2px solid var(--success-300);
   outline-offset: 2px;
+  background: linear-gradient(135deg, var(--success-500), var(--success-600)) !important;
+}
+
+/* Fix for any white background issues on checkout button */
+.btn-checkout,
+.btn-checkout:visited {
+  background: linear-gradient(135deg, var(--success-500), var(--success-600)) !important;
+  color: white !important;
+}
+
+.btn-checkout:hover,
+.btn-checkout:focus,
+.btn-checkout:active {
+  background: linear-gradient(135deg, var(--success-600), var(--success-700)) !important;
+  color: white !important;
 }
 
 /* POS Layout */
