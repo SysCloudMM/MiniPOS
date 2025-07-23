@@ -9,6 +9,14 @@ let categories = [];
 let customers = [];
 let currentSection = 'pos';
 
+// Payment methods management
+let paymentMethods = [
+    { id: 1, name: 'Cash', type: 'cash', description: 'Physical cash payment', enabled: true, default: true },
+    { id: 2, name: 'Credit/Debit Card', type: 'card', description: 'Card payment via terminal', enabled: true, default: true },
+    { id: 3, name: 'Digital Payment', type: 'digital', description: 'Mobile payment apps', enabled: true, default: true }
+];
+let nextPaymentMethodId = 4;
+
 // Pagination variables
 let currentPage = 1;
 const itemsPerPage = 10;
@@ -111,6 +119,12 @@ function setupEventListeners() {
     const addUserBtn = document.getElementById('addUserBtn');
     if (addUserBtn) {
         addUserBtn.addEventListener('click', () => openUserModal());
+    }
+    
+    // Payment method form
+    const addPaymentMethodForm = document.getElementById('addPaymentMethodForm');
+    if (addPaymentMethodForm) {
+        addPaymentMethodForm.addEventListener('submit', handleAddPaymentMethod);
     }
     
     // Form submissions
@@ -247,6 +261,9 @@ function showDashboard() {
     
     // Load initial data
     loadInitialData();
+    
+    // Initialize payment methods
+    updatePaymentMethodDropdown();
 }
 
 // Navigation
@@ -557,6 +574,147 @@ function addToCart(productId) {
 function removeFromCart(productId) {
     cart = cart.filter(item => item.product_id !== productId);
     updateCartDisplay();
+}
+
+// Payment method functions
+function updatePaymentMethodDropdown() {
+    const paymentMethodSelect = document.getElementById('paymentMethod');
+    if (!paymentMethodSelect) return;
+    
+    const enabledMethods = paymentMethods.filter(method => method.enabled);
+    
+    paymentMethodSelect.innerHTML = enabledMethods.map(method => 
+        `<option value="${method.type}">${method.name}</option>`
+    ).join('');
+    
+    // Set default selection to cash if available
+    const defaultMethod = enabledMethods.find(method => method.type === 'cash');
+    if (defaultMethod) {
+        paymentMethodSelect.value = defaultMethod.type;
+    }
+}
+
+function handlePaymentMethodChange() {
+    const paymentMethodSelect = document.getElementById('paymentMethod');
+    const selectedMethod = paymentMethods.find(method => 
+        method.type === paymentMethodSelect.value && method.enabled
+    );
+    
+    if (selectedMethod) {
+        console.log('Payment method changed to:', selectedMethod.name);
+        // You can add specific logic here for different payment methods
+    }
+}
+
+function openPaymentMethodSettings() {
+    const modal = document.getElementById('paymentMethodModal');
+    if (!modal) return;
+    
+    displayPaymentMethods();
+    modal.classList.add('active');
+}
+
+function displayPaymentMethods() {
+    const paymentMethodsList = document.getElementById('paymentMethodsList');
+    if (!paymentMethodsList) return;
+    
+    paymentMethodsList.innerHTML = paymentMethods.map(method => `
+        <div class="payment-method-item">
+            <div class="payment-method-info">
+                <div class="payment-method-name">${method.name}</div>
+                <span class="payment-method-type">${method.type}</span>
+                ${method.description ? `<div class="payment-method-description">${method.description}</div>` : ''}
+            </div>
+            <div class="payment-method-actions">
+                <div class="payment-method-toggle">
+                    <span>Enabled</span>
+                    <div class="toggle-switch ${method.enabled ? 'active' : ''}" 
+                         onclick="togglePaymentMethod(${method.id})" 
+                         ${method.default ? 'title="Default payment methods cannot be disabled"' : ''}>
+                    </div>
+                </div>
+                ${!method.default ? `
+                    <button class="btn btn-sm btn-danger" onclick="deletePaymentMethod(${method.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `).join('');
+}
+
+function togglePaymentMethod(methodId) {
+    const method = paymentMethods.find(m => m.id === methodId);
+    if (!method || method.default) return; // Can't disable default methods
+    
+    method.enabled = !method.enabled;
+    displayPaymentMethods();
+    updatePaymentMethodDropdown();
+    
+    showNotification(
+        `Payment method "${method.name}" ${method.enabled ? 'enabled' : 'disabled'}`,
+        'success'
+    );
+}
+
+function deletePaymentMethod(methodId) {
+    const method = paymentMethods.find(m => m.id === methodId);
+    if (!method || method.default) return; // Can't delete default methods
+    
+    if (!confirm(`Are you sure you want to delete the payment method "${method.name}"?`)) return;
+    
+    paymentMethods = paymentMethods.filter(m => m.id !== methodId);
+    displayPaymentMethods();
+    updatePaymentMethodDropdown();
+    
+    showNotification(`Payment method "${method.name}" deleted successfully`, 'success');
+}
+
+async function handleAddPaymentMethod(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const name = document.getElementById('newPaymentMethodName').value.trim();
+    const type = document.getElementById('newPaymentMethodType').value;
+    const description = document.getElementById('newPaymentMethodDescription').value.trim();
+    
+    if (!name || !type) {
+        showNotification('Please fill in all required fields', 'error');
+        return;
+    }
+    
+    // Check if payment method name already exists
+    const existingMethod = paymentMethods.find(method => 
+        method.name.toLowerCase() === name.toLowerCase()
+    );
+    
+    if (existingMethod) {
+        showNotification('A payment method with this name already exists', 'error');
+        return;
+    }
+    
+    // Add new payment method
+    const newMethod = {
+        id: nextPaymentMethodId++,
+        name: name,
+        type: type,
+        description: description,
+        enabled: true,
+        default: false
+    };
+    
+    paymentMethods.push(newMethod);
+    
+    // Reset form
+    form.reset();
+    
+    // Update displays
+    displayPaymentMethods();
+    updatePaymentMethodDropdown();
+    
+    showNotification(`Payment method "${name}" added successfully`, 'success');
 }
 
 function updateCartQuantity(productId, change) {

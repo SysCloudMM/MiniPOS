@@ -258,11 +258,12 @@
                                             <div class="checkout-section">
                                                 <div class="payment-method">
                                                     <label>Payment Method</label>
-                                                    <select id="paymentMethod" class="form-select">
-                                                        <option value="cash">Cash</option>
-                                                        <option value="card">Card</option>
-                                                        <option value="digital">Digital</option>
+                                                    <select id="paymentMethod" class="form-select" onchange="handlePaymentMethodChange()">
+                                                        <!-- Payment methods will be populated by JavaScript -->
                                                     </select>
+                                                    <button type="button" class="btn btn-ghost btn-sm" onclick="openPaymentMethodSettings()" style="margin-top: 8px;">
+                                                        <i class="fas fa-cog"></i> Manage Payment Methods
+                                                    </button>
                                                 </div>
                                                 <button id="checkoutBtn" class="btn btn-primary btn-checkout">
                                                     <i class="fas fa-credit-card"></i>
@@ -880,6 +881,57 @@
         </div>
     </div>
 
+    <!-- Payment Method Settings Modal -->
+    <div id="paymentMethodModal" class="modal">
+        <div class="modal-backdrop"></div>
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="paymentMethodModalTitle">Payment Method Settings</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="payment-methods-list">
+                    <h4>Available Payment Methods</h4>
+                    <div id="paymentMethodsList">
+                        <!-- Payment methods will be populated here -->
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 24px;">
+                        <h4>Add New Payment Method</h4>
+                        <form id="addPaymentMethodForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="newPaymentMethodName">Method Name</label>
+                                    <input type="text" id="newPaymentMethodName" placeholder="e.g., Mobile Banking" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPaymentMethodType">Type</label>
+                                    <select id="newPaymentMethodType" required>
+                                        <option value="">Select Type</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="card">Card</option>
+                                        <option value="digital">Digital</option>
+                                        <option value="bank">Bank Transfer</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="newPaymentMethodDescription">Description (Optional)</label>
+                                <input type="text" id="newPaymentMethodDescription" placeholder="Brief description">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Payment Method
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline modal-cancel">Close</button>
+            </div>
+        </div>
+    </div>
 
     <script src="./app.js"></script>
 </body>
